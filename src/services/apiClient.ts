@@ -33,25 +33,64 @@ export interface DashboardSummary {
 class ApiClient {
   private baseUrl: string;
   private isOnlineBackendAvailable: boolean = false;
+  private healthPromise: Promise<boolean> | null = null;
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || '/api';
+    // Automatically use Render backend URL when hosted in production (e.g. Vercel), or /api for local dev proxy
+    const isBrowser = typeof window !== 'undefined';
+    const isLocal = isBrowser && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const defaultApiUrl = !isLocal ? 'https://hctp-backend.onrender.com/api' : '/api';
+
+    this.baseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
     this.checkBackendHealth();
   }
 
-  private async checkBackendHealth(): Promise<void> {
-    try {
-      const res = await fetch(`${this.baseUrl}/health`, { method: 'GET', signal: AbortSignal.timeout(1500) });
-      if (res.ok) {
-        this.isOnlineBackendAvailable = true;
+  public async checkBackendHealth(): Promise<boolean> {
+    if (this.healthPromise) return this.healthPromise;
+
+    this.healthPromise = (async () => {
+      try {
+        const res = await fetch(`${this.baseUrl}/health`, {
+          method: 'GET',
+          signal: AbortSignal.timeout(6000)
+        });
+        if (res.ok) {
+          this.isOnlineBackendAvailable = true;
+          return true;
+        }
+      } catch {
+        // Fallback to relative /api if absolute URL had any network issue
+        if (this.baseUrl.startsWith('http')) {
+          try {
+            const fallbackRes = await fetch('/api/health', {
+              method: 'GET',
+              signal: AbortSignal.timeout(4000)
+            });
+            if (fallbackRes.ok) {
+              this.baseUrl = '/api';
+              this.isOnlineBackendAvailable = true;
+              return true;
+            }
+          } catch {
+            // keep offline fallback
+          }
+        }
+        this.isOnlineBackendAvailable = false;
+      } finally {
+        this.healthPromise = null;
       }
-    } catch {
-      this.isOnlineBackendAvailable = false;
-    }
+      return this.isOnlineBackendAvailable;
+    })();
+
+    return this.healthPromise;
   }
 
   public getMode(): 'API' | 'LOCAL_DEMO_STORE' {
     return this.isOnlineBackendAvailable ? 'API' : 'LOCAL_DEMO_STORE';
+  }
+
+  public getBaseUrl(): string {
+    return this.baseUrl;
   }
 
   // Applications
@@ -111,25 +150,39 @@ class ApiClient {
   public async updateApplicationStatus(
     id: string,
     status: ApplicationStatus,
-    reason: string
+    reason: string,
+    actor?: string
   ): Promise<{ success: boolean; message: string }> {
     if (this.isOnlineBackendAvailable) {
       try {
         const res = await fetch(`${this.baseUrl}/applications/${id}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status, reason })
+          body: JSON.stringify({ status, reason, actor })
         });
         const data = await res.json();
+        // Also update local store to stay synchronized
+        demoStore.updateApplicationStatus(id, status, reason, actor);
         return data;
       } catch (err) {
         console.warn('API error, falling back to local demo store', err);
       }
     }
-    return demoStore.updateApplicationStatus(id, status, reason);
+    return demoStore.updateApplicationStatus(id, status, reason, actor);
   }
 
   public async getDashboardSummary(): Promise<DashboardSummary> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/dashboard`);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
+
     const apps = demoStore.getApplications();
     const certs = demoStore.getCertificates();
     const inspections = demoStore.getInspections();
@@ -168,22 +221,77 @@ class ApiClient {
   }
 
   public async getOrganizations(): Promise<Organization[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/organizations`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.organizations;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
     return demoStore.getOrganizations();
   }
 
   public async getInspections(): Promise<InspectionRecord[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/inspections`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.inspections;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
     return demoStore.getInspections();
   }
 
   public async getCertificates(): Promise<CertificateRecord[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/certificates`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.certificates;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
     return demoStore.getCertificates();
   }
 
   public async getRenewals(): Promise<RenewalRecord[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/renewals`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.renewals;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
     return demoStore.getRenewals();
   }
 
   public async getAuditHistory(): Promise<AuditHistoryEvent[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/audit-history`);
+        if (res.ok) {
+          const data = await res.json();
+          return data.auditLogs;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local demo store', err);
+      }
+    }
     return demoStore.getAuditHistory();
   }
 
@@ -221,6 +329,17 @@ class ApiClient {
       confirmationId,
       message: 'Your inquiry has been logged. An HCPT enterprise systems consultant will review your jurisdictional requirements.'
     };
+  }
+
+  public async resetDemoData(): Promise<void> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        await fetch(`${this.baseUrl}/reset`, { method: 'POST' });
+      } catch (err) {
+        console.warn('Backend reset error:', err);
+      }
+    }
+    demoStore.resetToDefaults();
   }
 }
 
