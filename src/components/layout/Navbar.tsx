@@ -12,7 +12,8 @@ import {
   Cpu,
   Building2,
   HelpCircle,
-  Mail
+  Mail,
+  Inbox
 } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
@@ -146,10 +147,23 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Action CTAs (Right) */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5">
+            <Link
+              to="/admin"
+              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors ${
+                location.pathname.startsWith('/admin')
+                  ? 'bg-slate-900 text-white border-slate-900'
+                  : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+              title="Admin Inquiries & Messages Portal"
+            >
+              <Inbox className="w-3.5 h-3.5 text-slate-500" />
+              <span>Admin Portal</span>
+            </Link>
+
             <Link
               to="/contact"
-              className="text-sm font-semibold text-slate-700 hover:text-emerald-800 transition-colors px-3 py-2"
+              className="text-sm font-semibold text-slate-700 hover:text-emerald-800 transition-colors px-2 py-2"
             >
               Discuss Requirements
             </Link>
@@ -227,11 +241,12 @@ export const Navbar: React.FC = () => {
               <span>Explore Platform Demo</span>
             </Link>
             <Link
-              to="/contact"
+              to="/admin"
               onClick={() => setMobileOpen(false)}
-              className="w-full block text-center py-2.5 text-sm font-semibold text-slate-700 border border-slate-300 rounded-lg"
+              className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-slate-800 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200"
             >
-              Discuss Your Requirements
+              <Inbox className="w-4 h-4 text-slate-600" />
+              <span>Admin Console (Inquiries & Messages)</span>
             </Link>
           </div>
         </div>

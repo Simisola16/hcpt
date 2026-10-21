@@ -381,7 +381,7 @@ export const ContactPage: React.FC = () => {
                 All inquiries are treated with strict confidentiality. Non-Disclosure Agreements (NDAs) can be executed prior to technical discussions regarding formulation datasets or sovereign auditing workflows.
               </p>
               <div className="text-xs text-slate-500 pt-2 border-t border-slate-100 font-mono">
-                Direct Email: contact@hcpt.example.com
+                Direct Email: <a href="mailto:info@techhalal.com" className="text-emerald-700 hover:underline">info@techhalal.com</a>
               </div>
             </div>
 

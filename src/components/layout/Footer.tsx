@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Mail, ArrowUpRight, Lock, Globe2, FileCheck2 } from 'lucide-react';
+import { ShieldCheck, Mail, ArrowUpRight, Lock, Globe2, FileCheck2, Inbox } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -138,6 +138,12 @@ export const Footer: React.FC = () => {
                   About HCPT
                 </Link>
               </li>
+              <li>
+                <Link to="/admin" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-medium text-emerald-300">
+                  <Inbox className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Admin Console (Inquiries & Messages)</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -152,7 +158,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-2 text-xs text-slate-300">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-slate-200">contact@hcpt.example.com</span>
+                <a href="mailto:info@techhalal.com" className="font-mono text-slate-200 hover:text-emerald-400 transition-colors">info@techhalal.com</a>
               </div>
               <div className="flex items-center gap-2">
                 <Globe2 className="w-4 h-4 text-emerald-400 shrink-0" />

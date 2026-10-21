@@ -1,4 +1,4 @@
-import { demoStore } from './demoStore';
+import { demoStore, StoredInquiry } from './demoStore';
 import {
   CertificationApplication,
   Organization,
@@ -295,7 +295,9 @@ class ApiClient {
     return demoStore.getAuditHistory();
   }
 
-  public async submitContactInquiry(inquiry: ContactInquiry): Promise<{ success: boolean; message: string; confirmationId: string }> {
+  public async submitContactInquiry(inquiry: ContactInquiry): Promise<{ success: boolean; message: string; confirmationId: string; emailSent?: boolean }> {
+    let confirmationId = `HCPT-INQ-${Math.floor(100000 + Math.random() * 900000)}`;
+
     if (this.isOnlineBackendAvailable) {
       try {
         const res = await fetch(`${this.baseUrl}/contact`, {
@@ -304,18 +306,71 @@ class ApiClient {
           body: JSON.stringify(inquiry)
         });
         if (res.ok) {
-          return await res.json();
+          const data = await res.json();
+          confirmationId = data.confirmationId || confirmationId;
+          demoStore.addInquiry({
+            confirmationId,
+            ...inquiry,
+            status: 'NEW',
+            receivedAt: new Date().toISOString()
+          });
+          return data;
         }
       } catch (err) {
-        console.warn('API error, falling back to local response', err);
+        console.warn('API error, falling back to client-side dispatch', err);
       }
     }
 
-    // Realistic simulation with confirmation ID
-    const confirmationId = `HCPT-INQ-${Math.floor(100000 + Math.random() * 900000)}`;
-    
+    // Direct Resend Fallback Dispatch (Guarantees delivery to villagecoders7@gmail.com)
+    let emailSent = false;
+    const clientResendKey = import.meta.env.VITE_RESEND_API_KEY;
+    if (clientResendKey) {
+      try {
+        const emailRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${clientResendKey}`
+          },
+          body: JSON.stringify({
+            from: 'HCPT Enterprise <onboarding@resend.dev>',
+            to: ['villagecoders7@gmail.com'],
+            replyTo: [inquiry.officialEmail, 'info@techhalal.com'],
+            subject: `[HCPT Lead] ${inquiry.organizationName} — ${inquiry.fullName} (${confirmationId})`,
+            html: `
+              <h2>HCPT — New Enterprise Engagement Request</h2>
+              <p><strong>Confirmation:</strong> ${confirmationId}</p>
+              <p><strong>Name:</strong> ${inquiry.fullName}</p>
+              <p><strong>Organization:</strong> ${inquiry.organizationName}</p>
+              <p><strong>Official Email:</strong> <a href="mailto:${inquiry.officialEmail}">${inquiry.officialEmail}</a></p>
+              <p><strong>Phone:</strong> ${inquiry.phoneNumber || 'Not provided'}</p>
+              <p><strong>Jurisdiction:</strong> ${inquiry.jurisdiction}</p>
+              <p><strong>Current Operating Model:</strong> ${inquiry.currentSystem}</p>
+              <p><strong>Annual Volume:</strong> ${inquiry.annualCertificates}</p>
+              <p><strong>Requirements & Details:</strong></p>
+              <blockquote style="background:#f1f5f9;padding:12px;border-left:4px solid #006837;">${inquiry.inquiryDetails}</blockquote>
+            `
+          })
+        });
+        if (emailRes.ok) {
+          emailSent = true;
+          console.log('[Resend Client Dispatch] Successfully sent notification to villagecoders7@gmail.com');
+        }
+      } catch (e) {
+        console.warn('[Resend Client Dispatch Error]:', e);
+      }
+    }
+
+    // Store in demoStore
+    demoStore.addInquiry({
+      confirmationId,
+      ...inquiry,
+      status: 'NEW',
+      receivedAt: new Date().toISOString()
+    });
+
     // Store in audit trail
-    demoStore['addAuditLog']?.(
+    demoStore.addAuditLog?.(
       'CONTACT_INQUIRY_RECEIVED',
       'Inquiry',
       confirmationId,
@@ -327,8 +382,43 @@ class ApiClient {
     return {
       success: true,
       confirmationId,
-      message: 'Your inquiry has been logged. An HCPT enterprise systems consultant will review your jurisdictional requirements.'
+      emailSent,
+      message: 'Your inquiry has been logged in the HCPT enterprise consultation pipeline.'
     };
+  }
+
+  public async getContactInquiries(): Promise<StoredInquiry[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/admin/inquiries`);
+        if (res.ok) {
+          const list: StoredInquiry[] = await res.json();
+          return list;
+        }
+      } catch (err) {
+        console.warn('API error fetching inquiries, using local store:', err);
+      }
+    }
+    return demoStore.getInquiries();
+  }
+
+  public async updateInquiryStatus(confirmationId: string, status: StoredInquiry['status']): Promise<boolean> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/admin/inquiries/${confirmationId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          demoStore.updateInquiryStatus(confirmationId, status);
+          return true;
+        }
+      } catch (err) {
+        console.warn('API error updating inquiry status, updating locally:', err);
+      }
+    }
+    return demoStore.updateInquiryStatus(confirmationId, status);
   }
 
   public async resetDemoData(): Promise<void> {

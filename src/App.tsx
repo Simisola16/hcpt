@@ -15,6 +15,7 @@ import { CapabilitiesPage } from './pages/CapabilitiesPage';
 import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { PublicVerificationPage } from './pages/PublicVerificationPage';
+import { AdminInquiriesPage } from './pages/AdminInquiriesPage';
 
 // Platform Demo
 import { PlatformDemoPage } from './pages/PlatformDemoPage';
@@ -143,6 +144,32 @@ export function App() {
           element={
             <CorporateLayout>
               <PublicVerificationPage />
+            </CorporateLayout>
+          }
+        />
+
+        {/* Admin Portal - Enterprise Engagement Inquiries & Messages */}
+        <Route
+          path="/admin"
+          element={
+            <CorporateLayout>
+              <AdminInquiriesPage />
+            </CorporateLayout>
+          }
+        />
+        <Route
+          path="/admin/inquiries"
+          element={
+            <CorporateLayout>
+              <AdminInquiriesPage />
+            </CorporateLayout>
+          }
+        />
+        <Route
+          path="/admin/messages"
+          element={
+            <CorporateLayout>
+              <AdminInquiriesPage />
             </CorporateLayout>
           }
         />
