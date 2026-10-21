@@ -94,7 +94,7 @@ export const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-start">
 
             {/* Left Column: Messaging */}
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
 
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
@@ -115,7 +115,7 @@ export const HomePage: React.FC = () => {
               </p>
 
               {/* Value metrics pill */}
-              <div className="grid grid-cols-3 gap-4 pt-2 pb-2 border-y border-slate-200/80 max-w-xl">
+              <div className="grid grid-cols-3 gap-4 pt-1.5 pb-1.5 border-y border-slate-200/80 max-w-xl">
                 <div>
                   <div className="text-2xl font-bold text-slate-900">100%</div>
                   <div className="text-xs text-slate-500 font-medium">Digital Workflow Intake</div>
@@ -131,7 +131,7 @@ export const HomePage: React.FC = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-4 pt-1">
                 <Link
                   to="/platform-demo"
                   className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-lg bg-[#006837] text-white text-base font-semibold hover:bg-[#00502b] transition-all shadow-md shadow-emerald-900/15 group"
@@ -149,7 +149,7 @@ export const HomePage: React.FC = () => {
                 </Link>
               </div>
 
-              <div className="text-xs text-slate-500 flex items-center gap-4 pt-1">
+              <div className="text-xs text-slate-500 flex items-center gap-4 pt-0.5">
                 <span className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   Full Audit Traceability
@@ -166,7 +166,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Right Column: Platform Demo Video Space */}
-            <div className="lg:col-span-5 lg:pt-24 xl:pt-28">
+            <div className="lg:col-span-5 lg:pt-16 xl:pt-20">
               <div className="relative mx-auto max-w-lg lg:max-w-none">
 
                 {/* Subtle outer ambient glow */}
