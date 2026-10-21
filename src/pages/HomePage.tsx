@@ -197,7 +197,7 @@ export const HomePage: React.FC = () => {
 
                     {/* The Provided Animated Demo GIF */}
                     <img
-                      src="/product-demo.gif?v=2"
+                      src="/product-demo.gif?v=3"
                       alt="HCPT Platform Demo Walkthrough"
                       className="w-full h-full object-cover object-top"
                       loading="eager"
