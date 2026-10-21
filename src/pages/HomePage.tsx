@@ -104,8 +104,9 @@ export const HomePage: React.FC = () => {
 
               {/* Primary Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-[1.12]">
-                Modernize Halal Certification. <br className="hidden sm:inline" />
-                <span className="text-[#006837]">From Application to Issuance.</span>
+                Specialists in <br className="hidden sm:inline" />
+                <span className="whitespace-nowrap">End-to-End</span> <br className="hidden sm:inline" />
+                <span className="text-[#006837]">Halal Certification Digitalisation</span>
               </h1>
 
               {/* Supporting Copy */}
@@ -167,7 +168,7 @@ export const HomePage: React.FC = () => {
             {/* Right Column: Platform Demo Video Space */}
             <div className="lg:col-span-5 lg:pt-24 xl:pt-28">
               <div className="relative mx-auto max-w-lg lg:max-w-none">
-                
+
                 {/* Subtle outer ambient glow */}
                 <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500/25 via-teal-500/20 to-[#006837]/30 rounded-2xl blur-lg opacity-75 transition duration-700 pointer-events-none" />
 
@@ -193,7 +194,7 @@ export const HomePage: React.FC = () => {
 
                   {/* Video Player / Demo Screen Area */}
                   <div className="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
-                    
+
                     {/* The Provided Animated Demo GIF */}
                     <img
                       src="/product-demo.gif?v=2"
@@ -512,8 +513,8 @@ export const HomePage: React.FC = () => {
                 type="button"
                 onClick={() => setActiveWorkflowStep(idx)}
                 className={`p-3 text-left rounded-lg transition-all border ${activeWorkflowStep === idx
-                    ? 'bg-emerald-950 text-white border-emerald-600 ring-2 ring-emerald-500/30'
-                    : 'bg-slate-800/70 text-slate-400 border-slate-700/80 hover:bg-slate-800 hover:text-slate-200'
+                  ? 'bg-emerald-950 text-white border-emerald-600 ring-2 ring-emerald-500/30'
+                  : 'bg-slate-800/70 text-slate-400 border-slate-700/80 hover:bg-slate-800 hover:text-slate-200'
                   }`}
               >
                 <div className="text-xs font-mono font-bold text-emerald-400 mb-1">
