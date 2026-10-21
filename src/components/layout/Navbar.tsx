@@ -26,7 +26,6 @@ export const Navbar: React.FC = () => {
     { label: 'Industries', href: '/industries' },
     { label: 'Technology', href: '/technology' },
     { label: 'Capabilities', href: '/capabilities' },
-    { label: 'Verify Seal', href: '/verify' },
     { label: 'About', href: '/about' },
     { label: 'Contact', href: '/contact' }
   ];
@@ -55,14 +54,14 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="flex items-center justify-between min-h-[5rem] sm:min-h-[5.5rem] py-2">
           
           {/* Logo with strict preservation (Left) */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded">
+          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded shrink-0">
             <img
               src="/hcpt-logo.jpg"
               alt="HCPT — Halal Certification Processing Technologies"
-              className="h-12 sm:h-13 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+              className="h-16 sm:h-20 md:h-[84px] w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
               loading="eager"
             />
           </Link>
