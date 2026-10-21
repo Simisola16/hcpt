@@ -179,7 +179,7 @@ export const DemoHeader: React.FC<DemoHeaderProps> = ({
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 p-3 z-50 text-left text-xs animate-in fade-in duration-100">
                 <div className="pb-3 border-b border-slate-100">
                   <div className="font-bold text-slate-900">Dr. Tariq Al-Hashimi</div>
-                  <div className="text-slate-500 text-[11px]">t.alhashimi@hcpt.example.com</div>
+                  <div className="text-slate-500 text-[11px]">t.alhashimi@techhalal.com</div>
                   <div className="mt-1 inline-block text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                     Role: LEAD_TECHNICAL_ASSESSOR
                   </div>

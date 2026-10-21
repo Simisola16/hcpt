@@ -1,4 +1,4 @@
-import { demoStore, StoredInquiry } from './demoStore';
+import { demoStore, StoredInquiry, VisitorLocationRecord } from './demoStore';
 import {
   CertificationApplication,
   Organization,
@@ -419,6 +419,122 @@ class ApiClient {
       }
     }
     return demoStore.updateInquiryStatus(confirmationId, status);
+  }
+
+  public async getVisitorLocations(): Promise<VisitorLocationRecord[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/visitors/locations`);
+        if (res.ok) {
+          const list: VisitorLocationRecord[] = await res.json();
+          return list;
+        }
+      } catch (err) {
+        console.warn('API error fetching visitor locations, using local store:', err);
+      }
+    }
+    return demoStore.getVisitorLocations();
+  }
+
+  public async recordVisitorLocation(loc: {
+    city?: string;
+    region?: string;
+    country?: string;
+    countryCode?: string;
+    flag?: string;
+  }): Promise<VisitorLocationRecord> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/visitors/location`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(loc)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.location) {
+            demoStore.recordVisitorLocation(data.location);
+            return data.location;
+          }
+        }
+      } catch (err) {
+        console.warn('API error recording visitor location, storing locally:', err);
+      }
+    }
+    return demoStore.recordVisitorLocation({
+      city: loc.city || 'Unknown City',
+      region: loc.region || '',
+      country: loc.country || 'Unknown Country',
+      countryCode: loc.countryCode || 'UN',
+      flag: loc.flag || '🌐'
+    });
+  }
+
+  public async trackVisitorLocation(): Promise<void> {
+    if (typeof window === 'undefined') return;
+
+    // Throttle logging per session to avoid duplicate calls on every click
+    const sessionKey = 'hcpt_visitor_logged_session';
+    const lastLogged = sessionStorage.getItem(sessionKey);
+    if (lastLogged) return;
+
+    try {
+      sessionStorage.setItem(sessionKey, '1');
+
+      // Helper to convert 2-letter country code to flag emoji
+      const getCountryFlag = (code: string) => {
+        if (!code || code.length !== 2) return '🌐';
+        const codePoints = code
+          .toUpperCase()
+          .split('')
+          .map(char => 127397 + char.charCodeAt(0));
+        return String.fromCodePoint(...codePoints);
+      };
+
+      // Query fast, anonymous IP location endpoint
+      let geoData: { city?: string; region?: string; country?: string; countryCode?: string; flag?: string } | null = null;
+
+      try {
+        const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(3500) });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.country_name || data.city) {
+            geoData = {
+              city: data.city || data.region || 'Unknown City',
+              region: data.region || '',
+              country: data.country_name || 'International',
+              countryCode: data.country_code || 'UN',
+              flag: getCountryFlag(data.country_code)
+            };
+          }
+        }
+      } catch {
+        // Fallback service
+        try {
+          const res2 = await fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout(3500) });
+          if (res2.ok) {
+            const data2 = await res2.json();
+            if (data2.countryName || data2.cityName) {
+              geoData = {
+                city: data2.cityName || 'Unknown City',
+                region: data2.regionName || '',
+                country: data2.countryName || 'International',
+                countryCode: data2.countryCode || 'UN',
+                flag: getCountryFlag(data2.countryCode)
+              };
+            }
+          }
+        } catch {
+          // offline or blocked by adblock
+        }
+      }
+
+      if (geoData) {
+        await this.recordVisitorLocation(geoData);
+      }
+    } catch (e) {
+      console.warn('[Visitor Location Tracker] Silent fallback:', e);
+    }
   }
 
   public async resetDemoData(): Promise<void> {

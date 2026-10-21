@@ -31,6 +31,8 @@ function ScrollToTop() {
   return null;
 }
 
+import { apiClient } from './services/apiClient';
+
 // Layout wrapper for corporate pages
 function CorporateLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -43,6 +45,11 @@ function CorporateLayout({ children }: { children: React.ReactNode }) {
 }
 
 export function App() {
+  useEffect(() => {
+    // Automatically record visitor location for institutional reach analytics (strictly location data)
+    apiClient.trackVisitorLocation();
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTop />

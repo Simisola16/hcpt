@@ -33,6 +33,109 @@ export interface StoredInquiry {
   receivedAt: string;
 }
 
+export interface VisitorLocationRecord {
+  id: string;
+  city: string;
+  region: string;
+  country: string;
+  countryCode: string;
+  flag: string;
+  timestamp: string;
+}
+
+export const INITIAL_VISITOR_LOCATIONS: VisitorLocationRecord[] = [
+  {
+    id: 'loc-101',
+    city: 'Dubai',
+    region: 'Dubai',
+    country: 'United Arab Emirates',
+    countryCode: 'AE',
+    flag: '🇦🇪',
+    timestamp: new Date(Date.now() - 4 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-102',
+    city: 'Kuala Lumpur',
+    region: 'Federal Territory',
+    country: 'Malaysia',
+    countryCode: 'MY',
+    flag: '🇲🇾',
+    timestamp: new Date(Date.now() - 18 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-103',
+    city: 'Riyadh',
+    region: 'Riyadh Province',
+    country: 'Saudi Arabia',
+    countryCode: 'SA',
+    flag: '🇸🇦',
+    timestamp: new Date(Date.now() - 35 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-104',
+    city: 'Abu Dhabi',
+    region: 'Abu Dhabi',
+    country: 'United Arab Emirates',
+    countryCode: 'AE',
+    flag: '🇦🇪',
+    timestamp: new Date(Date.now() - 52 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-105',
+    city: 'London',
+    region: 'Greater London',
+    country: 'United Kingdom',
+    countryCode: 'GB',
+    flag: '🇬🇧',
+    timestamp: new Date(Date.now() - 80 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-106',
+    city: 'Jakarta',
+    region: 'DKI Jakarta',
+    country: 'Indonesia',
+    countryCode: 'ID',
+    flag: '🇮🇩',
+    timestamp: new Date(Date.now() - 110 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-107',
+    city: 'Istanbul',
+    region: 'Marmara',
+    country: 'Turkey',
+    countryCode: 'TR',
+    flag: '🇹🇷',
+    timestamp: new Date(Date.now() - 150 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-108',
+    city: 'Singapore',
+    region: 'Central Region',
+    country: 'Singapore',
+    countryCode: 'SG',
+    flag: '🇸🇬',
+    timestamp: new Date(Date.now() - 210 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-109',
+    city: 'Chicago',
+    region: 'Illinois',
+    country: 'United States',
+    countryCode: 'US',
+    flag: '🇺🇸',
+    timestamp: new Date(Date.now() - 290 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'loc-110',
+    city: 'Doha',
+    region: 'Ad Dawhah',
+    country: 'Qatar',
+    countryCode: 'QA',
+    flag: '🇶🇦',
+    timestamp: new Date(Date.now() - 380 * 60 * 1000).toISOString()
+  }
+];
+
 export const INITIAL_INQUIRIES: StoredInquiry[] = [
   {
     confirmationId: 'HCPT-INQ-849102',
@@ -82,7 +185,8 @@ const STORAGE_KEYS = {
   CERTIFICATES: 'hcpt_demo_certificates_v1',
   RENEWALS: 'hcpt_demo_renewals_v1',
   AUDIT_LOGS: 'hcpt_demo_audit_logs_v1',
-  INQUIRIES: 'hcpt_demo_inquiries_v1'
+  INQUIRIES: 'hcpt_demo_inquiries_v1',
+  VISITOR_LOCATIONS: 'hcpt_visitor_locations_v1'
 };
 
 function loadStorage<T>(key: string, fallback: T): T {
@@ -111,6 +215,7 @@ export class DemoStore {
   private renewals: RenewalRecord[];
   private auditLogs: AuditHistoryEvent[];
   private inquiries: StoredInquiry[];
+  private visitorLocations: VisitorLocationRecord[];
   private listeners: (() => void)[] = [];
 
   constructor() {
@@ -121,6 +226,7 @@ export class DemoStore {
     this.renewals = loadStorage(STORAGE_KEYS.RENEWALS, INITIAL_RENEWALS);
     this.auditLogs = loadStorage(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
     this.inquiries = loadStorage(STORAGE_KEYS.INQUIRIES, INITIAL_INQUIRIES);
+    this.visitorLocations = loadStorage(STORAGE_KEYS.VISITOR_LOCATIONS, INITIAL_VISITOR_LOCATIONS);
   }
 
   public subscribe(listener: () => void): () => void {
@@ -605,6 +711,27 @@ export class DemoStore {
     return false;
   }
 
+  // --- VISITOR LOCATIONS ---
+  public getVisitorLocations(): VisitorLocationRecord[] {
+    return [...this.visitorLocations];
+  }
+
+  public recordVisitorLocation(loc: Omit<VisitorLocationRecord, 'id' | 'timestamp'> & { id?: string; timestamp?: string }): VisitorLocationRecord {
+    const newRecord: VisitorLocationRecord = {
+      id: loc.id || `loc-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      city: loc.city || 'Unknown City',
+      region: loc.region || '',
+      country: loc.country || 'Unknown Country',
+      countryCode: (loc.countryCode || 'UN').toUpperCase(),
+      flag: loc.flag || '🌐',
+      timestamp: loc.timestamp || new Date().toISOString()
+    };
+    this.visitorLocations = [newRecord, ...this.visitorLocations].slice(0, 100);
+    saveStorage(STORAGE_KEYS.VISITOR_LOCATIONS, this.visitorLocations);
+    this.notify();
+    return newRecord;
+  }
+
   // --- RESET ---
   public resetToDefaults(): void {
     localStorage.removeItem(STORAGE_KEYS.APPLICATIONS);
@@ -614,6 +741,7 @@ export class DemoStore {
     localStorage.removeItem(STORAGE_KEYS.RENEWALS);
     localStorage.removeItem(STORAGE_KEYS.AUDIT_LOGS);
     localStorage.removeItem(STORAGE_KEYS.INQUIRIES);
+    localStorage.removeItem(STORAGE_KEYS.VISITOR_LOCATIONS);
 
     this.applications = [...INITIAL_APPLICATIONS];
     this.organizations = [...INITIAL_ORGANIZATIONS];
@@ -622,6 +750,7 @@ export class DemoStore {
     this.renewals = [...INITIAL_RENEWALS];
     this.auditLogs = [...INITIAL_AUDIT_LOGS];
     this.inquiries = [...INITIAL_INQUIRIES];
+    this.visitorLocations = [...INITIAL_VISITOR_LOCATIONS];
 
     this.notify();
   }
