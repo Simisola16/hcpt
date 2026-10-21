@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ChevronDown,
@@ -18,7 +18,22 @@ import {
 export const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 25) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const isDemoActive = location.pathname.startsWith('/platform-demo');
 
@@ -52,16 +67,34 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/90'
+          : 'bg-white border-b border-slate-200'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between min-h-[5rem] sm:min-h-[5.5rem] py-2">
-          
-          {/* Logo with strict preservation (Left) */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded shrink-0">
+        <div
+          className={`flex items-center justify-between transition-all duration-300 ${
+            isScrolled
+              ? 'min-h-[4.25rem] sm:min-h-[4.75rem] py-1.5'
+              : 'min-h-[5.5rem] sm:min-h-[6.25rem] py-2.5 sm:py-3'
+          }`}
+        >
+          {/* Logo (Left) — Large and prominent at top, animates to normal on scroll */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded shrink-0 relative z-10"
+          >
             <img
               src="/hcpt-logo.jpg"
               alt="HCPT — Halal Certification Processing Technologies"
-              className="h-16 sm:h-20 md:h-[84px] w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+              className={`w-auto object-contain transition-all duration-300 ease-out origin-left group-hover:scale-[1.02] ${
+                isScrolled
+                  ? 'h-12 sm:h-14 md:h-16'
+                  : 'h-20 sm:h-24 md:h-28 lg:h-[108px]'
+              }`}
               loading="eager"
             />
           </Link>

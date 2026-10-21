@@ -23,7 +23,8 @@ import {
   Eye,
   Server,
   Workflow,
-  QrCode
+  QrCode,
+  Play
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -163,12 +164,15 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Realistic Enterprise Software Interface Preview */}
+            {/* Right Column: Platform Demo Video Space */}
             <div className="lg:col-span-5">
               <div className="relative mx-auto max-w-lg lg:max-w-none">
+                
+                {/* Subtle outer ambient glow */}
+                <div className="absolute -inset-1.5 bg-gradient-to-r from-emerald-500/25 via-teal-500/20 to-[#006837]/30 rounded-2xl blur-lg opacity-75 transition duration-700 pointer-events-none" />
 
-                {/* Enterprise Dashboard Preview Frame */}
-                <div className="rounded-xl border border-slate-300 bg-white shadow-2xl overflow-hidden text-left">
+                {/* Video Frame */}
+                <div className="relative rounded-2xl border border-slate-300 bg-slate-950 shadow-2xl overflow-hidden text-left group">
 
                   {/* Window Bar */}
                   <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
@@ -176,98 +180,87 @@ export const HomePage: React.FC = () => {
                       <div className="w-3 h-3 rounded-full bg-rose-500/80" />
                       <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                       <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                      <span className="ml-2 text-xs font-mono text-slate-300 font-medium">
-                        hcpt-console // authority-v2.4
+                      <span className="ml-2 text-xs font-mono text-slate-300 font-medium flex items-center gap-1.5">
+                        <Play className="w-3 h-3 text-emerald-400 fill-emerald-400" />
+                        hcpt-demo // live-platform-walkthrough.mp4
                       </span>
                     </div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
-                      Live Assessor View
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/80 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live Platform Demo
                     </span>
                   </div>
 
-                  {/* Mock Console Header */}
-                  <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs text-slate-500 font-semibold uppercase">Current Application File</div>
-                      <div className="text-sm font-bold text-slate-900 font-mono">HCPT-APP-2026-0814</div>
+                  {/* Video Player / Demo Screen Area */}
+                  <div className="relative aspect-video w-full bg-slate-950 flex items-center justify-center overflow-hidden">
+                    
+                    {/* The Provided Animated Demo GIF */}
+                    <img
+                      src="/product-demo.gif?v=2"
+                      alt="HCPT Platform Demo Walkthrough"
+                      className="w-full h-full object-cover object-top"
+                      loading="eager"
+                    />
+
+                    {/* Subtle bottom gradient vignette */}
+                    <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none" />
+
+                    {/* Live HD Indicator Badge */}
+                    <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-md border border-slate-700/70 text-[10px] text-emerald-300 font-mono shadow-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>1080p Demo Walkthrough</span>
                     </div>
-                    <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-                      Technical Review
-                    </span>
+
+                    {/* Interactive Hover Overlay to try live demo */}
+                    <Link
+                      to="/platform-demo"
+                      className="absolute inset-0 bg-slate-950/50 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 text-center cursor-pointer"
+                    >
+                      <div className="w-14 h-14 rounded-full bg-[#006837]/90 text-white flex items-center justify-center shadow-xl shadow-emerald-950/60 mb-2 transform scale-90 group-hover:scale-100 transition-transform duration-200">
+                        <Sparkles className="w-6 h-6 text-emerald-300" />
+                      </div>
+                      <span className="text-sm font-bold text-white tracking-wide">
+                        Launch Interactive Platform Demo
+                      </span>
+                      <span className="text-xs text-slate-300 mt-0.5">
+                        Test live intake, review gates, and certificate issuance
+                      </span>
+                    </Link>
                   </div>
 
-                  {/* Console Body Preview */}
-                  <div className="p-4 space-y-4 text-xs">
-
-                    {/* Organization card */}
-                    <div className="p-3 bg-white border border-slate-200 rounded-lg space-y-1.5">
-                      <div className="flex justify-between items-center text-slate-500">
-                        <span>Applicant Enterprise</span>
-                        <span className="font-mono text-[11px] text-slate-400">CR-882910-DXB</span>
-                      </div>
-                      <div className="font-bold text-slate-900 text-sm">Crescent Foods International Ltd</div>
-                      <div className="text-slate-600">Facility: Jebel Ali Central Processing #4 (Dubai, UAE)</div>
-                    </div>
-
-                    {/* Progress Checklist */}
-                    <div className="space-y-2">
-                      <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Evaluation Gates</div>
-
-                      <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                        <span className="flex items-center gap-2 text-slate-800">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Formula Bill of Materials (23 Ingredients)
-                        </span>
-                        <span className="text-emerald-700 font-semibold">Verified</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
-                        <span className="flex items-center gap-2 text-slate-800">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          Eurofins PCR Porcine DNA & Ethanol Assay
-                        </span>
-                        <span className="text-emerald-700 font-semibold">&lt; 0.05% Safe</span>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 rounded bg-amber-50/60 border border-amber-200">
-                        <span className="flex items-center gap-2 text-slate-900 font-medium">
-                          <Clock className="w-4 h-4 text-amber-600" />
-                          Cleaning-In-Place (CIP) Sanitization Log
-                        </span>
-                        <span className="text-amber-800 font-semibold">Assessor Queue</span>
-                      </div>
-                    </div>
-
-                    {/* Action Bar */}
-                    <div className="pt-2 flex items-center gap-2 border-t border-slate-200">
-                      <Link
-                        to="/platform-demo"
-                        className="flex-1 text-center py-2 px-3 bg-[#006837] text-white rounded font-semibold text-xs hover:bg-[#00502b] transition-colors"
-                      >
-                        Inspect Application File
-                      </Link>
-                      <Link
-                        to="/platform-demo"
-                        className="py-2 px-3 bg-slate-100 text-slate-700 rounded font-semibold text-xs hover:bg-slate-200 transition-colors"
-                      >
-                        Schedule Audit
-                      </Link>
-                    </div>
-
+                  {/* Player Footer Bar */}
+                  <div className="px-4 py-2.5 bg-slate-900/95 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                    <span className="flex items-center gap-1.5 text-slate-300 font-medium">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      Live Platform Demo Walkthrough
+                    </span>
+                    <Link
+                      to="/platform-demo"
+                      className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+                    >
+                      <span>Try Live Demo</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
                   </div>
 
                 </div>
 
-                {/* Floating Badge */}
-                <div className="absolute -bottom-5 -left-5 bg-white p-3 rounded-lg border border-slate-200 shadow-lg hidden sm:flex items-center gap-3">
-                  <div className="p-2 rounded bg-emerald-100 text-emerald-800">
-                    <Award className="w-5 h-5" />
+                {/* Floating Badge (Linked directly to interactive demo) */}
+                <Link
+                  to="/platform-demo"
+                  className="absolute -bottom-5 -left-5 bg-white p-3 rounded-xl border border-slate-200 shadow-xl hidden sm:flex items-center gap-3 hover:border-emerald-300 transition-colors group/badge"
+                >
+                  <div className="p-2 rounded-lg bg-emerald-100 text-emerald-800 group-hover/badge:bg-emerald-600 group-hover/badge:text-white transition-colors">
+                    <Sparkles className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="text-xs font-bold text-slate-900">Configurable Rule Engine</div>
-                    <div className="text-[11px] text-slate-500">Adapts to SMIIC, GSO, MS 1500 & BPJPH</div>
+                    <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
+                      <span>Explore Live Platform Demo</span>
+                      <ArrowRight className="w-3 h-3 text-emerald-600 group-hover/badge:translate-x-0.5 transition-transform" />
+                    </div>
+                    <div className="text-[11px] text-slate-500">Test all 6 certification stages interactively</div>
                   </div>
-                </div>
+                </Link>
 
               </div>
             </div>
