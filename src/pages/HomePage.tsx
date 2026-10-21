@@ -82,23 +82,23 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-24 pb-20">
-      
+
       {/* 1. HERO SECTION */}
       <section className="relative pt-4 pb-14 lg:pt-6 lg:pb-20 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
-        
+
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-            
+
             {/* Left Column: Messaging */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              
+
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                <span>Specialists in End-to-End Halal Certification Digitalisation</span>
+                <span>From Application to certification. All Digital.</span>
               </div>
 
               {/* Primary Headline */}
@@ -166,10 +166,10 @@ export const HomePage: React.FC = () => {
             {/* Right Column: Realistic Enterprise Software Interface Preview */}
             <div className="lg:col-span-5">
               <div className="relative mx-auto max-w-lg lg:max-w-none">
-                
+
                 {/* Enterprise Dashboard Preview Frame */}
                 <div className="rounded-xl border border-slate-300 bg-white shadow-2xl overflow-hidden text-left">
-                  
+
                   {/* Window Bar */}
                   <div className="bg-slate-900 text-white px-4 py-3 flex items-center justify-between border-b border-slate-800">
                     <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ export const HomePage: React.FC = () => {
 
                   {/* Console Body Preview */}
                   <div className="p-4 space-y-4 text-xs">
-                    
+
                     {/* Organization card */}
                     <div className="p-3 bg-white border border-slate-200 rounded-lg space-y-1.5">
                       <div className="flex justify-between items-center text-slate-500">
@@ -212,7 +212,7 @@ export const HomePage: React.FC = () => {
                     {/* Progress Checklist */}
                     <div className="space-y-2">
                       <div className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">Evaluation Gates</div>
-                      
+
                       <div className="flex items-center justify-between p-2 rounded bg-slate-50 border border-slate-200">
                         <span className="flex items-center gap-2 text-slate-800">
                           <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -292,7 +292,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          
+
           {/* 1. Halal Certification Portals */}
           <div className="card-enterprise rounded-xl p-8 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
@@ -498,7 +498,7 @@ export const HomePage: React.FC = () => {
       {/* 3. DIGITAL WORKFLOW LIFECYCLE SECTION */}
       <section className="bg-slate-900 text-white py-20 border-y border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
-          
+
           <div className="max-w-3xl space-y-3 mb-14">
             <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/60">
               End-to-End Governance Model
@@ -518,11 +518,10 @@ export const HomePage: React.FC = () => {
                 key={ws.step}
                 type="button"
                 onClick={() => setActiveWorkflowStep(idx)}
-                className={`p-3 text-left rounded-lg transition-all border ${
-                  activeWorkflowStep === idx
+                className={`p-3 text-left rounded-lg transition-all border ${activeWorkflowStep === idx
                     ? 'bg-emerald-950 text-white border-emerald-600 ring-2 ring-emerald-500/30'
                     : 'bg-slate-800/70 text-slate-400 border-slate-700/80 hover:bg-slate-800 hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <div className="text-xs font-mono font-bold text-emerald-400 mb-1">
                   0{ws.step}
@@ -537,7 +536,7 @@ export const HomePage: React.FC = () => {
           {/* Active Step Deep-Dive Card */}
           <div className="p-8 rounded-xl bg-slate-950 border border-slate-800 shadow-xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              
+
               <div className="lg:col-span-7 space-y-4">
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1 rounded text-xs font-mono font-bold bg-emerald-900/60 text-emerald-300 border border-emerald-700">
@@ -636,7 +635,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
+
           <div className="p-6 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition-colors space-y-3">
             <div className="text-sm font-bold text-slate-900 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-600" />
@@ -733,7 +732,7 @@ export const HomePage: React.FC = () => {
       <section className="bg-slate-100 py-16 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            
+
             <div className="lg:col-span-6 space-y-4">
               <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
                 Institutional Software Architecture
@@ -835,7 +834,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          
+
           <div className="p-4 rounded-lg border border-slate-200 bg-white space-y-2">
             <div className="w-8 h-8 rounded bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs font-mono">
               01
