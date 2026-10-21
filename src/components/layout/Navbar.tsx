@@ -55,19 +55,43 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16 sm:h-18">
           
-          {/* Logo with strict preservation */}
-          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded">
-            <img
-              src="/hcpt-logo.jpg"
-              alt="HCPT — Halal Certification Processing Technologies"
-              className="h-14 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
-              loading="eager"
-            />
-          </Link>
+          {/* Action CTAs (Placed on Left as requested) */}
+          <div className="hidden sm:flex items-center gap-3">
+            <Link
+              to="/contact"
+              className="text-sm font-semibold text-slate-700 hover:text-emerald-800 transition-colors px-3 py-2"
+            >
+              Discuss Requirements
+            </Link>
+            
+            <Link
+              to="/platform-demo"
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold shadow-xs transition-all duration-200 ${
+                isDemoActive
+                  ? 'bg-slate-900 text-white hover:bg-slate-800'
+                  : 'bg-[#006837] text-white hover:bg-[#00522b] shadow-emerald-900/10'
+              }`}
+            >
+              <ShieldCheck className="w-4 h-4 text-emerald-300" />
+              <span>Explore Platform Demo</span>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
+          {/* Mobile hamburger button */}
+          <div className="flex lg:hidden items-center">
+            <button
+              type="button"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Desktop Navigation (Center) */}
           <nav className="hidden lg:flex items-center gap-8" aria-label="Main Navigation">
             
             {/* Solutions Dropdown */}
@@ -146,39 +170,15 @@ export const Navbar: React.FC = () => {
             ))}
           </nav>
 
-          {/* Action CTAs */}
-          <div className="hidden sm:flex items-center gap-4">
-            <Link
-              to="/contact"
-              className="text-sm font-semibold text-slate-700 hover:text-emerald-800 transition-colors px-3 py-2"
-            >
-              Discuss Requirements
-            </Link>
-            
-            <Link
-              to="/platform-demo"
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-all duration-200 ${
-                isDemoActive
-                  ? 'bg-slate-900 text-white hover:bg-slate-800'
-                  : 'bg-[#006837] text-white hover:bg-[#00522b] shadow-emerald-900/10'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 text-emerald-300" />
-              <span>Explore Platform Demo</span>
-            </Link>
-          </div>
-
-          {/* Mobile hamburger button */}
-          <div className="flex lg:hidden items-center">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 rounded-md text-slate-700 hover:text-slate-900 hover:bg-slate-100"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
+          {/* Logo (Placed on Right as requested) */}
+          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded">
+            <img
+              src="/hcpt-logo.jpg"
+              alt="HCPT — Halal Certification Processing Technologies"
+              className="h-12 sm:h-13 w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+              loading="eager"
+            />
+          </Link>
         </div>
       </div>
 

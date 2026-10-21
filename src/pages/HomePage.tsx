@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
     <div className="space-y-24 pb-20">
       
       {/* 1. HERO SECTION */}
-      <section className="relative pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
+      <section className="relative pt-4 pb-14 lg:pt-6 lg:pb-20 overflow-hidden border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
         
         {/* Subtle grid pattern background */}
         <div className="absolute inset-0 bg-[radial-gradient(#CBD5E1_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
@@ -98,7 +98,7 @@ export const HomePage: React.FC = () => {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
-                <span>Enterprise Halal Certification Management Software</span>
+                <span>Specialists in End-to-End Halal Certification Digitalisation</span>
               </div>
 
               {/* Primary Headline */}
