@@ -165,7 +165,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             {/* Right Column: Platform Demo Video Space */}
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 lg:pt-24 xl:pt-28">
               <div className="relative mx-auto max-w-lg lg:max-w-none">
                 
                 {/* Subtle outer ambient glow */}
