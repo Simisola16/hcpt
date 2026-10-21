@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ChevronDown,
@@ -18,18 +18,7 @@ import {
 export const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [solutionsOpen, setSolutionsOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const isDemoActive = location.pathname.startsWith('/platform-demo');
 
@@ -65,38 +54,17 @@ export const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-18 relative">
+        <div className="flex items-center justify-between min-h-[5rem] sm:min-h-[5.5rem] py-2">
           
-          {/* Logo Container (Left) — Sits on the dividing line between navbar and landing section, retreats on scroll */}
-          <div className="relative flex items-center shrink-0 w-36 sm:w-44 md:w-52 h-full z-20">
-            <Link
-              to="/"
-              className={`absolute left-0 flex items-center focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded transition-all duration-300 ease-out origin-top-left ${
-                isScrolled
-                  ? 'top-1/2 -translate-y-1/2'
-                  : 'top-1/2 translate-y-2 sm:translate-y-3 md:translate-y-4'
-              }`}
-            >
-              <div
-                className={`transition-all duration-300 ease-out ${
-                  isScrolled
-                    ? 'p-0 bg-transparent rounded-none shadow-none border-transparent'
-                    : 'p-1.5 sm:p-2 bg-white rounded-xl shadow-md border border-slate-200/90 hover:shadow-lg'
-                }`}
-              >
-                <img
-                  src="/hcpt-logo.jpg"
-                  alt="HCPT — Halal Certification Processing Technologies"
-                  className={`w-auto object-contain transition-all duration-300 ease-out group-hover:scale-[1.02] ${
-                    isScrolled
-                      ? 'h-10 sm:h-12 md:h-13'
-                      : 'h-16 sm:h-20 md:h-[84px] lg:h-[92px]'
-                  }`}
-                  loading="eager"
-                />
-              </div>
-            </Link>
-          </div>
+          {/* Logo with strict preservation (Left) */}
+          <Link to="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded shrink-0">
+            <img
+              src="/hcpt-logo.jpg"
+              alt="HCPT — Halal Certification Processing Technologies"
+              className="h-16 sm:h-20 md:h-[84px] w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+              loading="eager"
+            />
+          </Link>
 
           {/* Desktop Navigation (Center) */}
           <nav className="hidden lg:flex items-center gap-8" aria-label="Main Navigation">
