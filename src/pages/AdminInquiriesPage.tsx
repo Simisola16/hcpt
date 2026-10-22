@@ -33,7 +33,6 @@ import {
   EyeOff,
   LogOut,
   KeyRound,
-  UserCheck,
   MessageSquare,
   Smartphone
 } from 'lucide-react';
@@ -47,8 +46,8 @@ export function AdminInquiriesPage() {
   const [adminUser, setAdminUser] = useState<{ username: string; email: string; role: string } | null>(null);
 
   // Login Form State
-  const [loginIdentifier, setLoginIdentifier] = useState('admin');
-  const [loginPassword, setLoginPassword] = useState('hcpt123');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -139,12 +138,6 @@ export function AdminInquiriesPage() {
     setAdminUser(null);
     setInquiries([]);
     setVisitorLocations([]);
-    setLoginError(null);
-  };
-
-  const fillDemoCredentials = () => {
-    setLoginIdentifier('admin');
-    setLoginPassword('hcpt123');
     setLoginError(null);
   };
 
@@ -345,7 +338,7 @@ export function AdminInquiriesPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleLoginSubmit} className="p-6 sm:p-8 space-y-5">
+            <form onSubmit={handleLoginSubmit} className="p-6 sm:p-8 space-y-5" autoComplete="off">
               {loginError && (
                 <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in duration-200">
                   <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
@@ -369,7 +362,8 @@ export function AdminInquiriesPage() {
                     required
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="admin or villagecoders7@gmail.com"
+                    placeholder="Enter admin username or email"
+                    autoComplete="off"
                     className="w-full pl-10 pr-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#006837] focus:border-[#006837] focus:bg-white transition-all outline-none"
                   />
                 </div>
@@ -389,6 +383,7 @@ export function AdminInquiriesPage() {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="Enter admin password"
+                    autoComplete="new-password"
                     className="w-full pl-10 pr-10 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#006837] focus:border-[#006837] focus:bg-white transition-all outline-none"
                   />
                   <button
@@ -430,33 +425,6 @@ export function AdminInquiriesPage() {
                   </>
                 )}
               </button>
-
-              {/* Quick credential reminder card */}
-              <div className="mt-4 pt-4 border-t border-slate-100 bg-slate-50 rounded-xl p-3.5 border border-slate-200/80">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
-                    <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
-                    Authorized Access Details
-                  </span>
-                  <button
-                    type="button"
-                    onClick={fillDemoCredentials}
-                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
-                  >
-                    Auto-Fill
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-700">
-                  <div className="bg-white p-2 rounded border border-slate-200">
-                    <div className="text-[10px] text-slate-400 font-sans">Username</div>
-                    <div className="truncate font-bold">admin</div>
-                  </div>
-                  <div className="bg-white p-2 rounded border border-slate-200">
-                    <div className="text-[10px] text-slate-400 font-sans">Password</div>
-                    <div className="truncate font-bold">hcpt123</div>
-                  </div>
-                </div>
-              </div>
             </form>
           </div>
 

@@ -49,8 +49,8 @@ export function SupportMobilePage() {
   const [adminUser, setAdminUser] = useState<{ username: string; email: string; role: string } | null>(null);
 
   // Login Form State
-  const [loginIdentifier, setLoginIdentifier] = useState('admin');
-  const [loginPassword, setLoginPassword] = useState('hcpt123');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -323,13 +323,15 @@ export function SupportMobilePage() {
             </div>
           )}
 
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <form onSubmit={handleLoginSubmit} className="space-y-4" autoComplete="off">
             <div>
               <label className="block text-xs text-slate-300 mb-1">Username</label>
               <input
                 type="text"
                 value={loginIdentifier}
                 onChange={e => setLoginIdentifier(e.target.value)}
+                placeholder="Enter admin username"
+                autoComplete="off"
                 required
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
@@ -341,6 +343,8 @@ export function SupportMobilePage() {
                 type="password"
                 value={loginPassword}
                 onChange={e => setLoginPassword(e.target.value)}
+                placeholder="Enter admin password"
+                autoComplete="new-password"
                 required
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
               />
