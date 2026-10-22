@@ -51,6 +51,32 @@ export const Navbar: React.FC = () => {
     }
   ];
 
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
+  // On Admin pages: Remove the public navigation links and CTAs, leave only the HCPT logo
+  if (isAdminRoute) {
+    return (
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center min-h-[5rem] sm:min-h-[5.5rem] py-2">
+            <Link
+              to="/admin"
+              className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-emerald-600 rounded shrink-0"
+              title="HCPT Admin Portal"
+            >
+              <img
+                src="/hcpt-logo.jpg"
+                alt="HCPT — Halal Certification Processing Technologies"
+                className="h-16 sm:h-20 md:h-[84px] w-auto object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+                loading="eager"
+              />
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

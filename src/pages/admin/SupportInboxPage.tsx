@@ -415,10 +415,12 @@ export function SupportInboxPage() {
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Link to="/admin" className="flex items-center space-x-2 text-white hover:text-emerald-400 transition">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center font-bold text-white text-sm">
-                H
-              </div>
+            <Link to="/admin" className="flex items-center space-x-2.5 text-white hover:text-emerald-400 transition" title="Back to Admin Console">
+              <img
+                src="/hcpt-logo.jpg"
+                alt="HCPT Logo"
+                className="h-9 sm:h-10 w-auto object-contain bg-white rounded-md px-1.5 py-0.5"
+              />
               <span className="font-bold tracking-tight text-sm hidden sm:inline">HCPT Administration</span>
             </Link>
             <span className="text-slate-600">/</span>
@@ -565,6 +567,16 @@ export function SupportInboxPage() {
                   Active ({stats.activeHuman})
                 </button>
                 <button
+                  onClick={() => setStatusFilter('open')}
+                  className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition ${
+                    statusFilter === 'open'
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                  }`}
+                >
+                  AI Handled ({stats.aiHandled})
+                </button>
+                <button
                   onClick={() => setStatusFilter('resolved')}
                   className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap transition ${
                     statusFilter === 'resolved'
@@ -572,7 +584,7 @@ export function SupportInboxPage() {
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >
-                  Resolved
+                  Resolved ({stats.resolved})
                 </button>
               </div>
             </div>

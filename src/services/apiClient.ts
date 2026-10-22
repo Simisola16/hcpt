@@ -1014,6 +1014,11 @@ class ApiClient {
     search?: string;
     unreadOnly?: boolean;
   }): Promise<SupportConversation[]> {
+    await this.checkBackendHealth();
+
+    let backendConvs: SupportConversation[] = [];
+    let backendSuccess = false;
+
     if (this.isOnlineBackendAvailable) {
       try {
         const headers: Record<string, string> = {};
@@ -1028,17 +1033,34 @@ class ApiClient {
         const res = await fetch(`${this.baseUrl}/admin/support/conversations?${params.toString()}`, { headers });
         if (res.ok) {
           const data = await res.json();
-          return data.conversations || [];
+          backendConvs = data.conversations || [];
+          backendSuccess = true;
         } else if (res.status === 401) {
-          this.setAdminToken(null);
-          throw new Error('Unauthorized');
+          console.warn('Backend returned 401 for admin support conversations, will check local storage fallback');
         }
       } catch (err: any) {
-        if (err?.message === 'Unauthorized') throw err;
-        console.warn('API error fetching admin support conversations, using demo store:', err);
+        console.warn('API error fetching admin support conversations:', err);
       }
     }
-    return demoStore.getSupportConversations(filter);
+
+    // Also get conversations stored locally in demoStore (from visitor testing or offline use)
+    const localConvs = demoStore.getSupportConversations(filter);
+
+    if (!backendSuccess && !this.isOnlineBackendAvailable) {
+      return localConvs;
+    }
+
+    // Merge backend conversations and local demoStore conversations so NO chat is ever lost
+    const seenIds = new Set(backendConvs.map(c => c.id));
+    const merged = [...backendConvs];
+    for (const c of localConvs) {
+      if (!seenIds.has(c.id)) {
+        merged.push(c);
+        seenIds.add(c.id);
+      }
+    }
+
+    return merged.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
 
   public async getAdminSupportConversationById(id: string): Promise<SupportConversation | null> {
@@ -1172,6 +1194,7 @@ class ApiClient {
   }
 
   public async getAdminSupportStats(): Promise<SupportStatsSummary> {
+    await this.checkBackendHealth();
     if (this.isOnlineBackendAvailable) {
       try {
         const headers: Record<string, string> = {};
@@ -1181,12 +1204,8 @@ class ApiClient {
         const res = await fetch(`${this.baseUrl}/admin/support/stats`, { headers });
         if (res.ok) {
           return await res.json();
-        } else if (res.status === 401) {
-          this.setAdminToken(null);
-          throw new Error('Unauthorized');
         }
       } catch (err: any) {
-        if (err?.message === 'Unauthorized') throw err;
         console.warn('API error fetching admin support stats:', err);
       }
     }

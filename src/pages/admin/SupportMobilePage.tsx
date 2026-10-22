@@ -72,7 +72,7 @@ export function SupportMobilePage() {
 
   // Filters & Search
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<'ALL' | 'AWAITING' | 'ACTIVE' | 'RESOLVED'>('ALL');
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'AWAITING' | 'ACTIVE' | 'AI' | 'RESOLVED'>('ALL');
 
   // Active Thread State
   const [replyText, setReplyText] = useState('');
@@ -298,6 +298,7 @@ export function SupportMobilePage() {
 
     if (activeFilter === 'AWAITING') return c.status === 'awaiting_human';
     if (activeFilter === 'ACTIVE') return c.handlingMode === 'human';
+    if (activeFilter === 'AI') return c.handlingMode === 'ai' && c.status !== 'resolved';
     if (activeFilter === 'RESOLVED') return c.status === 'resolved';
 
     return true;
@@ -751,6 +752,16 @@ export function SupportMobilePage() {
             }`}
           >
             Active ({stats.activeHuman})
+          </button>
+          <button
+            onClick={() => setActiveFilter('AI')}
+            className={`px-3 py-1 rounded-xl font-medium whitespace-nowrap transition ${
+              activeFilter === 'AI'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-emerald-50 text-emerald-800'
+            }`}
+          >
+            AI Handled ({stats.aiHandled})
           </button>
           <button
             onClick={() => setActiveFilter('RESOLVED')}

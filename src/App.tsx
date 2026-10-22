@@ -45,7 +45,7 @@ function CorporateLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Navbar />
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!isAdminRoute && <Footer />}
       {/* Discreet AI Support Chat Widget across public website pages */}
       {!isAdminRoute && <SupportChatWidget />}
     </div>
