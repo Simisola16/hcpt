@@ -11,6 +11,7 @@ import {
 import {
   SupportConversation,
   SupportMessage,
+  SupportCustomerInfo,
   InternalStaffNote,
   SupportStatsSummary
 } from '../types/support';
@@ -34,6 +35,92 @@ export interface DashboardSummary {
   certificatesApproachingExpiry: number;
   statusDistribution: { status: ApplicationStatus; count: number }[];
   outstandingTasksCount: number;
+}
+
+function getVerifiedSuggestedAnswer(message: string): string | null {
+  const norm = message.toLowerCase().trim();
+
+  // 1. Digital Halal certification processing
+  if (
+    norm.includes('digital halal certification processing work') ||
+    norm.includes('halal certification processing work') ||
+    (norm.includes('certification processing') && norm.includes('work')) ||
+    (norm.includes('how does') && norm.includes('certification') && norm.includes('work'))
+  ) {
+    return `Digital Halal certification processing on HCPT replaces fragmented manual paper submissions with a unified, sovereign 6-stage digital lifecycle:
+
+1. **Digital Intake Portal** (/solutions/halal-certification-portals): Applicants submit corporate registrations, industrial permits, and product dossiers online via dedicated enterprise portals.
+2. **Automated Electronic Processing** (/solutions/electronic-processing): Instant automated document validation, laboratory report ingestion, and biochemical cross-matching of all ingredients and E-numbers against international Halal standards (GSO 2055-1, OIC/SMIIC 1, JAKIM).
+3. **Technical & Shariah Review**: Multi-disciplinary review gates where qualified food scientists verify chemical formulations and Islamic scholars evaluate compliance.
+4. **Facility Audit & Inspection** (/solutions/certification-management): On-site or remote audits scheduled digitally with mobile inspector checklists, instant evidence capture, and automated non-conformance tracking.
+5. **Directorate & Shariah Decision**: Final evaluation and official sign-off by the Shariah Supervisory Board.
+6. **Tamper-Proof Certificate Issuance**: Generation of ECDSA-P384 cryptographically signed digital certificates sealed with SHA-256 digests and instant verification QR codes linked to the registry at **/verify**.
+
+You can explore the interactive 6-stage workflow simulation right now at **/platform-demo**.`;
+  }
+
+  // 2. Documentation required for enterprise application
+  if (
+    norm.includes('documentation is required for an enterprise application') ||
+    norm.includes('documentation is required') ||
+    norm.includes('documentation required') ||
+    (norm.includes('what documents') || norm.includes('what documentation'))
+  ) {
+    return `For an enterprise Halal application on the HCPT platform, you will need the following core documentation package:
+
+1. **Legal & Corporate Registration**: Official business registration / commercial license, industrial manufacturing permits, and physical facility layout schematics.
+2. **100% Product Formulations (BOM)**: Complete Bill of Materials listing every raw material, ingredient, sub-component, additive, and processing aid with percentage compositions.
+3. **Ingredient Technical Data & Halal Proofs**: Technical Data Sheets (TDS), Safety Data Sheets (SDS), flow charts of critical materials, and valid accredited Halal certificates for critical raw materials (e.g., gelatin, enzymes, emulsifiers, flavorings).
+4. **Food Safety & Quality Management Certifications**: Valid certifications such as HACCP, ISO 22000, or GMP, including sanitation standard operating procedures (SSOP) and pest control logs.
+5. **Internal Halal Assurance System (HAS)**: Documentation of your internal Halal management committee, appointed Halal officer, and raw material segregation procedures.
+
+All files can be securely uploaded in PDF, DOCX, or image formats directly through your applicant portal.`;
+  }
+
+  // 3. Verify an issued Halal certificate on HCPT
+  if (
+    norm.includes('verify an issued halal certificate on hcpt') ||
+    norm.includes('verify an issued halal certificate') ||
+    norm.includes('verify an issued certificate') ||
+    norm.includes('verify certificate') ||
+    norm.includes('check certificate')
+  ) {
+    return `You can verify any HCPT-issued Halal certificate instantly using two secure methods:
+
+1. **Public Online Registry**:
+   - Visit the official verification portal at **/verify** (or direct URL **/verify/:certNumber**).
+   - Enter the unique certificate reference number (e.g., **HCB-2026-F9821**).
+   - The registry will immediately display its live validation status, issuing Halal Certification Body (HCB), validity dates, product scope, and authorized categories.
+
+2. **Instant QR Code Scan**:
+   - Scan the secure QR code printed on the physical certificate or digital PDF with any smartphone camera.
+   - It will open the real-time cryptographic verification page on HCPT directly.
+
+Every certificate issued through HCPT is cryptographically signed using **ECDSA-P384** and sealed with a **SHA-256** digest, making tampering, forgery, or unauthorized alteration impossible.`;
+  }
+
+  // 4. Inspection review and renewal procedures
+  if (
+    norm.includes('inspection review and renewal procedures') ||
+    norm.includes('inspection review and renewal') ||
+    norm.includes('inspection review') ||
+    norm.includes('renewal procedures') ||
+    (norm.includes('inspection') && norm.includes('renewal'))
+  ) {
+    return `The inspection review and renewal procedures follow structured digital protocols on HCPT:
+
+* **Facility Inspection Review**:
+  - Following document and ingredient validation, technical and Shariah auditors are assigned through the platform.
+  - Auditors conduct an on-site evaluation of production lines, storage segregation, raw material intake, and sanitation practices.
+  - Any non-conformances (NCRs) are logged digitally in real time, and corrective action reports (CARs) are submitted directly through the portal for rapid clearance.
+
+* **Certificate Renewal Procedures**:
+  - Halal certificates are typically valid for **1 to 3 years** depending on the jurisdiction and issuing Halal Certification Body.
+  - Automated renewal notifications are dispatched **90, 60, and 30 days** prior to certificate expiration.
+  - **Fast-Track Digital Re-Audit**: Unchanged raw material formulations and approved suppliers are pre-cleared, requiring only updated laboratory test assays and annual facility re-inspection.`;
+  }
+
+  return null;
 }
 
 class ApiClient {
@@ -668,7 +755,7 @@ class ApiClient {
     conversationId?: string;
     sessionToken?: string;
     message: string;
-    customerInfo?: any;
+    customerInfo?: SupportCustomerInfo;
   }): Promise<{
     success: boolean;
     conversationId: string;
@@ -682,6 +769,9 @@ class ApiClient {
     humanHandlingNotice?: string;
     error?: string;
   }> {
+    // Ensure backend health check has run
+    await this.checkBackendHealth();
+
     if (this.isOnlineBackendAvailable) {
       try {
         const res = await fetch(`${this.baseUrl}/support/chat`, {
@@ -715,7 +805,7 @@ class ApiClient {
         id: newId,
         sessionToken: newToken,
         customer: {
-          name: payload.customerInfo?.name || 'Website Visitor',
+          name: payload.customerInfo?.name || 'Visitor',
           email: payload.customerInfo?.email,
           phone: payload.customerInfo?.phone,
           organization: payload.customerInfo?.organization,
@@ -739,7 +829,7 @@ class ApiClient {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       conversationId: conv.id,
       sender: 'customer',
-      authorName: conv.customer.name || 'Visitor',
+      authorName: conv.customer.name || 'You',
       text: payload.message.trim(),
       createdAt: now
     };
@@ -796,13 +886,16 @@ class ApiClient {
       };
     }
 
-    // Standard AI reply
+    // Verified 100% correct answers for Suggested Inquiries
+    const verifiedText = getVerifiedSuggestedAnswer(payload.message) ||
+      "Thank you for reaching out to HCPT. I can assist you with understanding our digital Halal certification platform, required documentation checklists, certificate verification, and inspection workflows. How can I help you today?";
+
     const aiReply: SupportMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       conversationId: conv.id,
       sender: 'ai',
       authorName: 'HCPT AI Assistant',
-      text: "Thank you for inquiring about HCPT. Our digital halal certification platform provides multi-tenant applicant intake, automated document validation with E-number ingredient verification, and cryptographically signed digital certificates. You can explore the complete interactive workflow at /platform-demo.",
+      text: verifiedText,
       createdAt: new Date().toISOString()
     };
     demoStore.addSupportMessage(conv.id, aiReply);
