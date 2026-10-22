@@ -863,6 +863,28 @@ class ApiClient {
     return true;
   }
 
+  public async returnToAiMode(conversationId: string, sessionToken: string): Promise<boolean> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/support/return-to-ai`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, sessionToken })
+        });
+        if (res.ok) return true;
+      } catch (err) {
+        console.warn('API error returning to AI mode:', err);
+      }
+    }
+
+    demoStore.updateSupportConversation(conversationId, {
+      status: 'open',
+      handlingMode: 'ai',
+      priority: 'normal'
+    });
+    return true;
+  }
+
   public async updateCustomerSupportContact(
     conversationId: string,
     sessionToken: string,
