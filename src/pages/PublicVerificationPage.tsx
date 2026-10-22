@@ -266,7 +266,7 @@ export const PublicVerificationPage: React.FC = () => {
                     to="/platform-demo"
                     className="font-bold text-emerald-800 hover:text-emerald-900 inline-flex items-center gap-1"
                   >
-                    <span>Inspect in Admin Console</span>
+                    <span>Inspect in Platform Demo</span>
                     <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>

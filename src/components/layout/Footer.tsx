@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Mail, ArrowUpRight, Lock, Globe2, FileCheck2, Inbox } from 'lucide-react';
+import { ShieldCheck, Mail, ArrowUpRight, Lock, Globe2, FileCheck2 } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -136,12 +136,6 @@ export const Footer: React.FC = () => {
               <li>
                 <Link to="/about" className="hover:text-emerald-400 transition-colors">
                   About HCPT
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin" className="hover:text-emerald-400 transition-colors flex items-center gap-1.5 font-medium text-emerald-300">
-                  <Inbox className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Admin Console (Inquiries & Messages)</span>
                 </Link>
               </li>
             </ul>
