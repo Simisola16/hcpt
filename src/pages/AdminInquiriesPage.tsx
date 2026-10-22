@@ -46,7 +46,7 @@ export function AdminInquiriesPage() {
 
   // Login Form State
   const [loginIdentifier, setLoginIdentifier] = useState('admin');
-  const [loginPassword, setLoginPassword] = useState('AdminPassword2026!');
+  const [loginPassword, setLoginPassword] = useState('hcpt123');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
@@ -142,7 +142,7 @@ export function AdminInquiriesPage() {
 
   const fillDemoCredentials = () => {
     setLoginIdentifier('admin');
-    setLoginPassword('AdminPassword2026!');
+    setLoginPassword('hcpt123');
     setLoginError(null);
   };
 
@@ -451,7 +451,7 @@ export function AdminInquiriesPage() {
                   </div>
                   <div className="bg-white p-2 rounded border border-slate-200">
                     <div className="text-[10px] text-slate-400 font-sans">Password</div>
-                    <div className="truncate font-bold">AdminPassword2026!</div>
+                    <div className="truncate font-bold">hcpt123</div>
                   </div>
                 </div>
               </div>

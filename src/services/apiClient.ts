@@ -99,7 +99,7 @@ class ApiClient {
 
     // Fallback verification for demo/offline resilience
     const validUser = trimmedId.toLowerCase() === 'admin' || trimmedId.toLowerCase() === 'villagecoders7@gmail.com' || trimmedId.toLowerCase() === 'admin@hcpt.com';
-    const validPass = trimmedPw === 'AdminPassword2026!';
+    const validPass = trimmedPw === 'hcpt123';
 
     if (validUser && validPass) {
       const fallbackToken = btoa(`admin:${Date.now()}:fallback_valid_session`);
