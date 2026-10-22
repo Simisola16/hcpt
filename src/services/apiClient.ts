@@ -823,7 +823,6 @@ class ApiClient {
     if (this.isOnlineBackendAvailable) {
       try {
         const headers: Record<string, string> = {};
-        if (sessionToken) headers['x-session-token'] = sessionToken;
         const token = this.getAdminToken();
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
