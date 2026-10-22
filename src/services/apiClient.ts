@@ -34,6 +34,7 @@ class ApiClient {
   private baseUrl: string;
   private isOnlineBackendAvailable: boolean = false;
   private healthPromise: Promise<boolean> | null = null;
+  private adminToken: string | null = null;
 
   constructor() {
     // Automatically use Render backend URL when hosted in production (e.g. Vercel), or /api for local dev proxy
@@ -42,7 +43,85 @@ class ApiClient {
     const defaultApiUrl = !isLocal ? 'https://hctp-backend.onrender.com/api' : '/api';
 
     this.baseUrl = import.meta.env.VITE_API_URL || defaultApiUrl;
+    if (isBrowser) {
+      this.adminToken = localStorage.getItem('hcpt_admin_token') || sessionStorage.getItem('hcpt_admin_token');
+    }
     this.checkBackendHealth();
+  }
+
+  public getAdminToken(): string | null {
+    if (!this.adminToken && typeof window !== 'undefined') {
+      this.adminToken = localStorage.getItem('hcpt_admin_token') || sessionStorage.getItem('hcpt_admin_token');
+    }
+    return this.adminToken;
+  }
+
+  public setAdminToken(token: string | null, remember: boolean = true): void {
+    this.adminToken = token;
+    if (typeof window !== 'undefined') {
+      if (token) {
+        if (remember) {
+          localStorage.setItem('hcpt_admin_token', token);
+          sessionStorage.removeItem('hcpt_admin_token');
+        } else {
+          sessionStorage.setItem('hcpt_admin_token', token);
+          localStorage.removeItem('hcpt_admin_token');
+        }
+      } else {
+        localStorage.removeItem('hcpt_admin_token');
+        sessionStorage.removeItem('hcpt_admin_token');
+      }
+    }
+  }
+
+  public async loginAdmin(identifier: string, password: string, remember: boolean = true): Promise<{ success: boolean; error?: string; admin?: any }> {
+    const trimmedId = identifier.trim();
+    const trimmedPw = password.trim();
+
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: trimmedId, password: trimmedPw })
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.token) {
+          this.setAdminToken(data.token, remember);
+          return { success: true, admin: data.admin };
+        } else {
+          return { success: false, error: data.error || 'Invalid credentials' };
+        }
+      } catch (err: any) {
+        console.warn('Backend login request failed, checking fallback verification:', err);
+      }
+    }
+
+    // Fallback verification for demo/offline resilience
+    const validUser = trimmedId.toLowerCase() === 'admin' || trimmedId.toLowerCase() === 'villagecoders7@gmail.com' || trimmedId.toLowerCase() === 'admin@hcpt.com';
+    const validPass = trimmedPw === 'AdminPassword2026!';
+
+    if (validUser && validPass) {
+      const fallbackToken = btoa(`admin:${Date.now()}:fallback_valid_session`);
+      this.setAdminToken(fallbackToken, remember);
+      return {
+        success: true,
+        admin: {
+          username: 'admin',
+          email: 'villagecoders7@gmail.com',
+          role: 'Super Administrator'
+        }
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Invalid administrative username or password. Please verify credentials.'
+    };
+  }
+
+  public logoutAdmin(): void {
+    this.setAdminToken(null);
   }
 
   public async checkBackendHealth(): Promise<boolean> {
@@ -390,12 +469,20 @@ class ApiClient {
   public async getContactInquiries(): Promise<StoredInquiry[]> {
     if (this.isOnlineBackendAvailable) {
       try {
-        const res = await fetch(`${this.baseUrl}/admin/inquiries`);
+        const headers: Record<string, string> = {};
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/inquiries`, { headers });
         if (res.ok) {
           const list: StoredInquiry[] = await res.json();
           return list;
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
         console.warn('API error fetching inquiries, using local store:', err);
       }
     }
@@ -405,16 +492,24 @@ class ApiClient {
   public async updateInquiryStatus(confirmationId: string, status: StoredInquiry['status']): Promise<boolean> {
     if (this.isOnlineBackendAvailable) {
       try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(`${this.baseUrl}/admin/inquiries/${confirmationId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ status })
         });
         if (res.ok) {
           demoStore.updateInquiryStatus(confirmationId, status);
           return true;
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
         console.warn('API error updating inquiry status, updating locally:', err);
       }
     }
@@ -424,12 +519,20 @@ class ApiClient {
   public async getVisitorLocations(): Promise<VisitorLocationRecord[]> {
     if (this.isOnlineBackendAvailable) {
       try {
-        const res = await fetch(`${this.baseUrl}/visitors/locations`);
+        const headers: Record<string, string> = {};
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/visitors/locations`, { headers });
         if (res.ok) {
           const list: VisitorLocationRecord[] = await res.json();
           return list;
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
         console.warn('API error fetching visitor locations, using local store:', err);
       }
     }

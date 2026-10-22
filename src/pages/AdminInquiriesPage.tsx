@@ -28,12 +28,30 @@ import {
   MapPin,
   Navigation,
   Compass,
-  Activity
+  Activity,
+  Lock,
+  EyeOff,
+  LogOut,
+  KeyRound,
+  UserCheck
 } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 import { StoredInquiry, VisitorLocationRecord } from '../services/demoStore';
 
 export function AdminInquiriesPage() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return !!apiClient.getAdminToken();
+  });
+  const [adminUser, setAdminUser] = useState<{ username: string; email: string; role: string } | null>(null);
+
+  // Login Form State
+  const [loginIdentifier, setLoginIdentifier] = useState('admin');
+  const [loginPassword, setLoginPassword] = useState('AdminPassword2026!');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
   const [activeTab, setActiveTab] = useState<'inquiries' | 'visitor_locations'>('inquiries');
   
   // Inquiries State
@@ -55,6 +73,13 @@ export function AdminInquiriesPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchAllData = async () => {
+    if (!apiClient.getAdminToken()) {
+      setIsAuthenticated(false);
+      setLoadingInquiries(false);
+      setLoadingLocations(false);
+      return;
+    }
+
     try {
       const [inqData, locData] = await Promise.all([
         apiClient.getContactInquiries(),
@@ -65,8 +90,12 @@ export function AdminInquiriesPage() {
       if (inqData.length > 0 && !selectedInquiryId) {
         setSelectedInquiryId(inqData[0].confirmationId);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load admin data:', err);
+      if (err?.message === 'Unauthorized') {
+        setIsAuthenticated(false);
+        setLoginError('Your administrative session has expired. Please sign in again.');
+      }
     } finally {
       setLoadingInquiries(false);
       setLoadingLocations(false);
@@ -75,8 +104,47 @@ export function AdminInquiriesPage() {
   };
 
   useEffect(() => {
-    fetchAllData();
-  }, []);
+    if (isAuthenticated) {
+      fetchAllData();
+    }
+  }, [isAuthenticated]);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setLoginLoading(true);
+
+    try {
+      const result = await apiClient.loginAdmin(loginIdentifier, loginPassword, rememberMe);
+      if (result.success) {
+        setIsAuthenticated(true);
+        if (result.admin) {
+          setAdminUser(result.admin);
+        }
+      } else {
+        setLoginError(result.error || 'Authentication failed. Please verify your credentials.');
+      }
+    } catch (err: any) {
+      setLoginError(err?.message || 'Network error occurred during authentication.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    apiClient.logoutAdmin();
+    setIsAuthenticated(false);
+    setAdminUser(null);
+    setInquiries([]);
+    setVisitorLocations([]);
+    setLoginError(null);
+  };
+
+  const fillDemoCredentials = () => {
+    setLoginIdentifier('admin');
+    setLoginPassword('AdminPassword2026!');
+    setLoginError(null);
+  };
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -250,6 +318,159 @@ export function AdminInquiriesPage() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[85vh] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Card */}
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            {/* Top brand header */}
+            <div className="bg-gradient-to-r from-emerald-950 via-[#006837] to-emerald-900 px-8 py-8 text-white text-center relative overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="w-14 h-14 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mb-3 shadow-inner">
+                  <ShieldCheck className="w-8 h-8 text-emerald-300" />
+                </div>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/15 text-emerald-200 border border-white/20 uppercase tracking-wider mb-1.5">
+                  <Lock className="w-3 h-3 text-emerald-300" />
+                  Restricted Access
+                </span>
+                <h1 className="text-xl font-extrabold tracking-tight">HCPT Admin Console</h1>
+                <p className="text-xs text-emerald-100/80 mt-1 max-w-xs">
+                  Institutional Intelligence, Client Inquiries & Location Telemetry
+                </p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleLoginSubmit} className="p-6 sm:p-8 space-y-5">
+              {loginError && (
+                <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold block">Authentication Failed</span>
+                    {loginError}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Admin Username or Official Email
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={loginIdentifier}
+                    onChange={(e) => setLoginIdentifier(e.target.value)}
+                    placeholder="admin or villagecoders7@gmail.com"
+                    className="w-full pl-10 pr-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#006837] focus:border-[#006837] focus:bg-white transition-all outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Administrative Password
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="Enter admin password"
+                    className="w-full pl-10 pr-10 py-2.5 text-sm text-slate-900 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#006837] focus:border-[#006837] focus:bg-white transition-all outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <label className="flex items-center gap-2 text-slate-600 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="w-4 h-4 text-[#006837] border-slate-300 rounded focus:ring-[#006837]"
+                  />
+                  <span>Remember administrative session</span>
+                </label>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full py-3 px-4 text-sm font-bold text-white bg-[#006837] hover:bg-[#00522b] rounded-lg shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 cursor-pointer"
+              >
+                {loginLoading ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Verifying Credentials...</span>
+                  </>
+                ) : (
+                  <>
+                    <KeyRound className="w-4 h-4 text-emerald-300" />
+                    <span>Unlock Admin Console</span>
+                  </>
+                )}
+              </button>
+
+              {/* Quick credential reminder card */}
+              <div className="mt-4 pt-4 border-t border-slate-100 bg-slate-50 rounded-xl p-3.5 border border-slate-200/80">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                    <UserCheck className="w-3.5 h-3.5 text-emerald-700" />
+                    Authorized Access Details
+                  </span>
+                  <button
+                    type="button"
+                    onClick={fillDemoCredentials}
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 underline cursor-pointer"
+                  >
+                    Auto-Fill
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono text-slate-700">
+                  <div className="bg-white p-2 rounded border border-slate-200">
+                    <div className="text-[10px] text-slate-400 font-sans">Username</div>
+                    <div className="truncate font-bold">admin</div>
+                  </div>
+                  <div className="bg-white p-2 rounded border border-slate-200">
+                    <div className="text-[10px] text-slate-400 font-sans">Password</div>
+                    <div className="truncate font-bold">AdminPassword2026!</div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div className="text-center mt-6">
+            <Link
+              to="/"
+              className="text-xs text-slate-400 hover:text-white transition-colors"
+            >
+              &larr; Return to HCPT Public Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-50 min-h-screen pb-16">
       {/* Top Banner & Header */}
@@ -275,19 +496,26 @@ export function AdminInquiriesPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Link
-                to="/contact"
-                className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-xs"
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Active Admin Session: <strong>{adminUser?.username || 'admin'}</strong></span>
+              </span>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition-colors shadow-xs cursor-pointer"
+                title="Sign out of Admin Console"
               >
-                <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                View Public Form
-              </Link>
+                <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                <span>Sign Out</span>
+              </button>
 
               <button
                 type="button"
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#006837] hover:bg-[#00522b] rounded-lg transition-colors shadow-xs disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#006837] hover:bg-[#00522b] rounded-lg transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
                 {refreshing ? 'Refreshing...' : 'Refresh Telemetry'}
