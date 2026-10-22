@@ -8,6 +8,12 @@ import {
   AuditHistoryEvent,
   ApplicationStatus
 } from '../types/certification';
+import {
+  SupportConversation,
+  SupportMessage,
+  InternalStaffNote,
+  SupportStatsSummary
+} from '../types/support';
 
 export interface ContactInquiry {
   fullName: string;
@@ -638,6 +644,439 @@ class ApiClient {
     } catch (e) {
       console.warn('[Visitor Location Tracker] Silent fallback:', e);
     }
+  }
+
+  // =========================================================================
+  // Support & AI Customer Support Chat Methods
+  // =========================================================================
+
+  public async getSupportConfig(): Promise<{ isAiConfigured: boolean; provider: string }> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/support/config`);
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn('API error fetching support config:', err);
+      }
+    }
+    return { isAiConfigured: true, provider: 'Simulated Demo AI' };
+  }
+
+  public async sendChatMessage(payload: {
+    conversationId?: string;
+    sessionToken?: string;
+    message: string;
+    customerInfo?: any;
+  }): Promise<{
+    success: boolean;
+    conversationId: string;
+    sessionToken: string;
+    status: string;
+    handlingMode: 'ai' | 'human';
+    message: SupportMessage;
+    reply: SupportMessage | null;
+    escalated?: boolean;
+    escalationReason?: string;
+    humanHandlingNotice?: string;
+    error?: string;
+  }> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/support/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data;
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+      } catch (err: any) {
+        console.warn('API error in support/chat, using demo store fallback:', err);
+      }
+    }
+
+    // Fallback in demoStore
+    let conv: SupportConversation | null = null;
+    if (payload.conversationId) {
+      conv = demoStore.getSupportConversationById(payload.conversationId);
+    }
+    const now = new Date().toISOString();
+
+    if (!conv) {
+      const newId = `conv-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      const newToken = `token-${Date.now()}-fallback-session`;
+      conv = {
+        id: newId,
+        sessionToken: newToken,
+        customer: {
+          name: payload.customerInfo?.name || 'Website Visitor',
+          email: payload.customerInfo?.email,
+          phone: payload.customerInfo?.phone,
+          organization: payload.customerInfo?.organization,
+          isGuest: !payload.customerInfo?.email,
+          visitorLocation: payload.customerInfo?.visitorLocation
+        },
+        status: 'open',
+        handlingMode: 'ai',
+        priority: 'normal',
+        unreadByAdmin: true,
+        unreadByCustomer: false,
+        messages: [],
+        internalNotes: [],
+        createdAt: now,
+        updatedAt: now
+      };
+      demoStore.createSupportConversation(conv);
+    }
+
+    const customerMsg: SupportMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      conversationId: conv.id,
+      sender: 'customer',
+      authorName: conv.customer.name || 'Visitor',
+      text: payload.message.trim(),
+      createdAt: now
+    };
+    demoStore.addSupportMessage(conv.id, customerMsg);
+
+    // If in human mode
+    if (conv.handlingMode === 'human' || conv.status === 'awaiting_human' || conv.status === 'human_handling') {
+      demoStore.updateSupportConversation(conv.id, { unreadByAdmin: true });
+      return {
+        success: true,
+        conversationId: conv.id,
+        sessionToken: conv.sessionToken || 'fallback',
+        status: conv.status,
+        handlingMode: 'human',
+        message: customerMsg,
+        reply: null,
+        humanHandlingNotice: 'Your message has been delivered to the HCPT human support team.'
+      };
+    }
+
+    // Check escalation keywords
+    const lower = payload.message.toLowerCase();
+    const needsEscalation = /human|person|agent|representative|speak to someone|talk to someone|live support|complaint/i.test(lower);
+
+    if (needsEscalation) {
+      const aiReply: SupportMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        conversationId: conv.id,
+        sender: 'ai',
+        authorName: 'HCPT AI Assistant',
+        text: "I understand you need to speak with our team. I've escalated this conversation to our human support representatives who will assist you shortly.",
+        createdAt: new Date().toISOString()
+      };
+      demoStore.addSupportMessage(conv.id, aiReply);
+      demoStore.updateSupportConversation(conv.id, {
+        status: 'awaiting_human',
+        handlingMode: 'human',
+        priority: 'urgent',
+        escalationReason: 'Visitor requested human assistance',
+        escalatedAt: new Date().toISOString(),
+        unreadByAdmin: true
+      });
+
+      return {
+        success: true,
+        conversationId: conv.id,
+        sessionToken: conv.sessionToken || 'fallback',
+        status: 'awaiting_human',
+        handlingMode: 'human',
+        message: customerMsg,
+        reply: aiReply,
+        escalated: true,
+        escalationReason: 'Visitor requested human assistance'
+      };
+    }
+
+    // Standard AI reply
+    const aiReply: SupportMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      conversationId: conv.id,
+      sender: 'ai',
+      authorName: 'HCPT AI Assistant',
+      text: "Thank you for inquiring about HCPT. Our digital halal certification platform provides multi-tenant applicant intake, automated document validation with E-number ingredient verification, and cryptographically signed digital certificates. You can explore the complete interactive workflow at /platform-demo.",
+      createdAt: new Date().toISOString()
+    };
+    demoStore.addSupportMessage(conv.id, aiReply);
+
+    return {
+      success: true,
+      conversationId: conv.id,
+      sessionToken: conv.sessionToken || 'fallback',
+      status: 'open',
+      handlingMode: 'ai',
+      message: customerMsg,
+      reply: aiReply,
+      escalated: false
+    };
+  }
+
+  public async getSupportConversation(conversationId: string, sessionToken?: string): Promise<SupportConversation | null> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = {};
+        if (sessionToken) headers['x-session-token'] = sessionToken;
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const url = `${this.baseUrl}/support/conversation/${conversationId}${sessionToken ? `?token=${encodeURIComponent(sessionToken)}` : ''}`;
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn('API error fetching conversation:', err);
+      }
+    }
+    return demoStore.getSupportConversationById(conversationId);
+  }
+
+  public async requestHumanEscalation(conversationId: string, sessionToken: string, reason?: string): Promise<boolean> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/support/escalate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, sessionToken, reason })
+        });
+        if (res.ok) return true;
+      } catch (err) {
+        console.warn('API error escalating to human:', err);
+      }
+    }
+
+    demoStore.updateSupportConversation(conversationId, {
+      status: 'awaiting_human',
+      handlingMode: 'human',
+      priority: 'urgent',
+      escalationReason: reason || 'Customer requested human support',
+      escalatedAt: new Date().toISOString(),
+      unreadByAdmin: true
+    });
+    return true;
+  }
+
+  public async updateCustomerSupportContact(
+    conversationId: string,
+    sessionToken: string,
+    contact: { name?: string; email?: string; phone?: string; organization?: string }
+  ): Promise<boolean> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const res = await fetch(`${this.baseUrl}/support/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId, sessionToken, ...contact })
+        });
+        if (res.ok) return true;
+      } catch (err) {
+        console.warn('API error updating customer support contact:', err);
+      }
+    }
+
+    const conv = demoStore.getSupportConversationById(conversationId);
+    if (conv) {
+      demoStore.updateSupportConversation(conversationId, {
+        customer: { ...conv.customer, ...contact, isGuest: !contact.email }
+      });
+    }
+    return true;
+  }
+
+  // =========================================================================
+  // Admin Support Inbox Management Methods (Protected)
+  // =========================================================================
+
+  public async getAdminSupportConversations(filter?: {
+    status?: string;
+    search?: string;
+    unreadOnly?: boolean;
+  }): Promise<SupportConversation[]> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = {};
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const params = new URLSearchParams();
+        if (filter?.status && filter.status !== 'all') params.set('status', filter.status);
+        if (filter?.search) params.set('search', filter.search);
+        if (filter?.unreadOnly) params.set('unread', 'true');
+
+        const res = await fetch(`${this.baseUrl}/admin/support/conversations?${params.toString()}`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          return data.conversations || [];
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error fetching admin support conversations, using demo store:', err);
+      }
+    }
+    return demoStore.getSupportConversations(filter);
+  }
+
+  public async getAdminSupportConversationById(id: string): Promise<SupportConversation | null> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = {};
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/support/conversations/${id}`, { headers });
+        if (res.ok) {
+          return await res.json();
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error fetching admin support conversation:', err);
+      }
+    }
+    return demoStore.getSupportConversationById(id);
+  }
+
+  public async sendAdminSupportReply(id: string, text: string, authorName?: string): Promise<SupportMessage | null> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/support/conversations/${id}/reply`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text, authorName: authorName || 'HCPT Support Specialist' })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.message;
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error sending support reply, using demo store:', err);
+      }
+    }
+
+    const humanMsg: SupportMessage = {
+      id: `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      conversationId: id,
+      sender: 'human',
+      authorName: authorName || 'HCPT Support Specialist',
+      text: text.trim(),
+      createdAt: new Date().toISOString()
+    };
+    demoStore.addSupportMessage(id, humanMsg);
+    demoStore.updateSupportConversation(id, {
+      handlingMode: 'human',
+      status: 'human_handling',
+      unreadByCustomer: true,
+      unreadByAdmin: false
+    });
+    return humanMsg;
+  }
+
+  public async updateAdminSupportStatus(
+    id: string,
+    updates: { status: string; handlingMode?: 'ai' | 'human'; priority?: string; assignedAgent?: string }
+  ): Promise<boolean> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/support/conversations/${id}/status`, {
+          method: 'PATCH',
+          headers,
+          body: JSON.stringify(updates)
+        });
+        if (res.ok) return true;
+        if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error updating support status:', err);
+      }
+    }
+
+    demoStore.updateSupportConversation(id, updates as any);
+    return true;
+  }
+
+  public async addAdminSupportInternalNote(id: string, text: string, author?: string): Promise<InternalStaffNote | null> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/support/conversations/${id}/notes`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text, author: author || 'Admin' })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return data.note;
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error adding internal note:', err);
+      }
+    }
+
+    const note: InternalStaffNote = {
+      id: `note-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      author: author || 'Admin',
+      text: text.trim(),
+      createdAt: new Date().toISOString()
+    };
+    demoStore.addInternalStaffNote(id, note);
+    return note;
+  }
+
+  public async getAdminSupportStats(): Promise<SupportStatsSummary> {
+    if (this.isOnlineBackendAvailable) {
+      try {
+        const headers: Record<string, string> = {};
+        const token = this.getAdminToken();
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`${this.baseUrl}/admin/support/stats`, { headers });
+        if (res.ok) {
+          return await res.json();
+        } else if (res.status === 401) {
+          this.setAdminToken(null);
+          throw new Error('Unauthorized');
+        }
+      } catch (err: any) {
+        if (err?.message === 'Unauthorized') throw err;
+        console.warn('API error fetching admin support stats:', err);
+      }
+    }
+    return demoStore.getSupportStats();
   }
 
   public async resetDemoData(): Promise<void> {

@@ -33,7 +33,9 @@ import {
   EyeOff,
   LogOut,
   KeyRound,
-  UserCheck
+  UserCheck,
+  MessageSquare,
+  Smartphone
 } from 'lucide-react';
 import { apiClient } from '../services/apiClient';
 import { StoredInquiry, VisitorLocationRecord } from '../services/demoStore';
@@ -501,6 +503,24 @@ export function AdminInquiriesPage() {
                 <span>Active Admin Session: <strong>{adminUser?.username || 'admin'}</strong></span>
               </span>
 
+              <Link
+                to="/admin/support"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-300 rounded-lg hover:bg-emerald-100 transition-colors shadow-xs"
+                title="Open Live AI & Human Support Inbox"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Support Inbox</span>
+              </Link>
+
+              <Link
+                to="/admin/support/mobile"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-800 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 transition-colors shadow-xs"
+                title="Open mobile-optimized support app"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-slate-600" />
+                <span>Mobile App</span>
+              </Link>
+
               <button
                 type="button"
                 onClick={handleLogout}
@@ -523,7 +543,7 @@ export function AdminInquiriesPage() {
             </div>
           </div>
 
-          {/* Tab Navigation: Engagement Inquiries vs Visitor Locations */}
+          {/* Tab Navigation: Engagement Inquiries vs Visitor Locations vs Live Support */}
           <div className="mt-5 flex items-center justify-between border-b border-slate-200">
             <div className="flex items-center gap-2">
               <button
@@ -562,6 +582,17 @@ export function AdminInquiriesPage() {
                   {visitorLocations.length} locations
                 </span>
               </button>
+
+              <Link
+                to="/admin/support"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300 transition-all -mb-px"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                <span>Live Support Inbox</span>
+                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-800 font-bold">
+                  AI & Human
+                </span>
+              </Link>
             </div>
 
             {/* Live Location Ticker Preview (Visible on both tabs) */}

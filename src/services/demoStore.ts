@@ -11,6 +11,12 @@ import {
   ReviewerNote
 } from '../types/certification';
 import {
+  SupportConversation,
+  SupportMessage,
+  InternalStaffNote,
+  SupportStatsSummary
+} from '../types/support';
+import {
   INITIAL_APPLICATIONS,
   INITIAL_ORGANIZATIONS,
   INITIAL_INSPECTIONS,
@@ -186,8 +192,171 @@ const STORAGE_KEYS = {
   RENEWALS: 'hcpt_demo_renewals_v1',
   AUDIT_LOGS: 'hcpt_demo_audit_logs_v1',
   INQUIRIES: 'hcpt_demo_inquiries_v1',
-  VISITOR_LOCATIONS: 'hcpt_visitor_locations_v1'
+  VISITOR_LOCATIONS: 'hcpt_visitor_locations_v1',
+  SUPPORT_CONVERSATIONS: 'hcpt_support_conversations_v1'
 };
+
+export const INITIAL_SUPPORT_CONVERSATIONS: SupportConversation[] = [
+  {
+    id: 'conv-hcpt-8821',
+    sessionToken: 'token-session-guest-8821-secure',
+    customer: {
+      name: 'Zayd Ibrahim',
+      email: 'z.ibrahim@emiratesfood.ae',
+      phone: '+971 4 883 9100',
+      organization: 'Emirates Food Group (UAE)',
+      isGuest: false,
+      visitorLocation: {
+        city: 'Dubai',
+        country: 'United Arab Emirates',
+        countryCode: 'AE',
+        flag: '🇦🇪'
+      }
+    },
+    status: 'awaiting_human',
+    handlingMode: 'human',
+    priority: 'urgent',
+    escalationReason: 'Visitor requested technical briefing on abattoir batch RFID tracking integration',
+    escalatedAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+    unreadByAdmin: true,
+    unreadByCustomer: false,
+    messages: [
+      {
+        id: 'msg-8821-1',
+        conversationId: 'conv-hcpt-8821',
+        sender: 'customer',
+        authorName: 'Zayd Ibrahim',
+        text: 'Hello, we are evaluating the platform demo for our slaughterhouse network. Can HCPT integrate with RFID livestock ear-tag scanners for pre-slaughter vetting?',
+        createdAt: new Date(Date.now() - 32 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'msg-8821-2',
+        conversationId: 'conv-hcpt-8821',
+        sender: 'ai',
+        authorName: 'HCPT AI Assistant',
+        text: 'Welcome to HCPT! Yes, our Electronic Application Processing and Workflow Management modules support automated ingestion of pre-slaughter livestock batches (including RFID tag telemetry and veterinary clearance certificates) aligned with GSO 993 standards.',
+        createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'msg-8821-3',
+        conversationId: 'conv-hcpt-8821',
+        sender: 'customer',
+        authorName: 'Zayd Ibrahim',
+        text: 'Can I speak with a technical human representative regarding high-throughput API latency and on-premise edge deployments?',
+        createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'msg-8821-4',
+        conversationId: 'conv-hcpt-8821',
+        sender: 'ai',
+        authorName: 'HCPT AI Assistant',
+        text: "I'll pass this conversation to the HCPT support team. You can continue sending messages here, and a team member will respond as soon as they are available.",
+        createdAt: new Date(Date.now() - 24 * 60 * 1000).toISOString()
+      }
+    ],
+    internalNotes: [
+      {
+        id: 'note-8821-1',
+        author: 'System Escalate',
+        text: 'Customer requested human assistance. Priority marked urgent due to sovereign abattoir evaluation.',
+        createdAt: new Date(Date.now() - 25 * 60 * 1000).toISOString()
+      }
+    ],
+    createdAt: new Date(Date.now() - 35 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 24 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'conv-hcpt-9142',
+    sessionToken: 'token-session-guest-9142-secure',
+    customer: {
+      name: 'Amina El-Sayed',
+      email: 'amina@cairologistics.eg',
+      organization: 'Cairo Food Logistics',
+      isGuest: false,
+      visitorLocation: {
+        city: 'Cairo',
+        country: 'Egypt',
+        countryCode: 'EG',
+        flag: '🇪🇬'
+      }
+    },
+    status: 'human_handling',
+    handlingMode: 'human',
+    priority: 'normal',
+    assignedAgent: 'admin',
+    unreadByAdmin: false,
+    unreadByCustomer: false,
+    messages: [
+      {
+        id: 'msg-9142-1',
+        conversationId: 'conv-hcpt-9142',
+        sender: 'customer',
+        authorName: 'Amina El-Sayed',
+        text: 'Hi, we checked certificate CERT-2026-8812 on the public verification page earlier today. Is the QR code scan cryptographically verified against the Central Registry?',
+        createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+      },
+      {
+        id: 'msg-9142-2',
+        conversationId: 'conv-hcpt-9142',
+        sender: 'human',
+        authorName: 'Admin',
+        text: 'Hello Amina! Yes, every QR code on an HCPT certificate embeds a digital cryptographic digest signed with ECDSA-P384. When scanned, it performs an immutable signature validation against our Central Registry.',
+        createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+      },
+      {
+        id: 'msg-9142-3',
+        conversationId: 'conv-hcpt-9142',
+        sender: 'customer',
+        authorName: 'Amina El-Sayed',
+        text: 'Excellent, that satisfies our port authority requirement for customs export to GCC countries.',
+        createdAt: new Date(Date.now() - 90 * 60 * 1000).toISOString()
+      }
+    ],
+    internalNotes: [],
+    createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'conv-hcpt-7031',
+    sessionToken: 'token-session-guest-7031-secure',
+    customer: {
+      name: 'Website Visitor',
+      isGuest: true,
+      visitorLocation: {
+        city: 'London',
+        country: 'United Kingdom',
+        countryCode: 'GB',
+        flag: '🇬🇧'
+      }
+    },
+    status: 'open',
+    handlingMode: 'ai',
+    priority: 'normal',
+    unreadByAdmin: false,
+    unreadByCustomer: false,
+    messages: [
+      {
+        id: 'msg-7031-1',
+        conversationId: 'conv-hcpt-7031',
+        sender: 'customer',
+        authorName: 'Guest',
+        text: 'What are the main stages of the certification workflow in HCPT?',
+        createdAt: new Date(Date.now() - 50 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'msg-7031-2',
+        conversationId: 'conv-hcpt-7031',
+        sender: 'ai',
+        authorName: 'HCPT AI Assistant',
+        text: 'The HCPT platform orchestrates a 6-stage lifecycle: 1. Electronic Intake & Triage, 2. Technical Assessor Review, 3. On-Site Inspection Scheduling & Audit, 4. Shariah Supervisory Board Ruling, 5. Directorate Sign-off, and 6. Cryptographic Certificate Issuance with QR Registry Verification.',
+        createdAt: new Date(Date.now() - 49 * 60 * 1000).toISOString()
+      }
+    ],
+    internalNotes: [],
+    createdAt: new Date(Date.now() - 55 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 49 * 60 * 1000).toISOString()
+  }
+];
 
 function loadStorage<T>(key: string, fallback: T): T {
   try {
@@ -216,6 +385,7 @@ export class DemoStore {
   private auditLogs: AuditHistoryEvent[];
   private inquiries: StoredInquiry[];
   private visitorLocations: VisitorLocationRecord[];
+  private supportConversations: SupportConversation[];
   private listeners: (() => void)[] = [];
 
   constructor() {
@@ -227,6 +397,7 @@ export class DemoStore {
     this.auditLogs = loadStorage(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
     this.inquiries = loadStorage(STORAGE_KEYS.INQUIRIES, INITIAL_INQUIRIES);
     this.visitorLocations = loadStorage(STORAGE_KEYS.VISITOR_LOCATIONS, INITIAL_VISITOR_LOCATIONS);
+    this.supportConversations = loadStorage(STORAGE_KEYS.SUPPORT_CONVERSATIONS, INITIAL_SUPPORT_CONVERSATIONS);
   }
 
   public subscribe(listener: () => void): () => void {
@@ -732,6 +903,89 @@ export class DemoStore {
     return newRecord;
   }
 
+  // --- SUPPORT CONVERSATIONS ---
+  public getSupportConversations(filter?: { status?: string; search?: string; unreadOnly?: boolean }): SupportConversation[] {
+    let result = [...this.supportConversations];
+    if (filter?.status && filter.status !== 'all') {
+      result = result.filter(c => c.status === filter.status);
+    }
+    if (filter?.unreadOnly) {
+      result = result.filter(c => c.unreadByAdmin);
+    }
+    if (filter?.search) {
+      const s = filter.search.toLowerCase();
+      result = result.filter(c =>
+        (c.customer.name && c.customer.name.toLowerCase().includes(s)) ||
+        (c.customer.email && c.customer.email.toLowerCase().includes(s)) ||
+        (c.customer.organization && c.customer.organization.toLowerCase().includes(s)) ||
+        c.id.toLowerCase().includes(s) ||
+        c.messages.some(m => m.text.toLowerCase().includes(s))
+      );
+    }
+    return result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+  }
+
+  public getSupportConversationById(id: string): SupportConversation | null {
+    return this.supportConversations.find(c => c.id === id) || null;
+  }
+
+  public createSupportConversation(conv: SupportConversation): SupportConversation {
+    this.supportConversations = [conv, ...this.supportConversations];
+    saveStorage(STORAGE_KEYS.SUPPORT_CONVERSATIONS, this.supportConversations);
+    this.notify();
+    return conv;
+  }
+
+  public updateSupportConversation(id: string, updates: Partial<SupportConversation>): SupportConversation | null {
+    const idx = this.supportConversations.findIndex(c => c.id === id);
+    if (idx === -1) return null;
+    this.supportConversations[idx] = {
+      ...this.supportConversations[idx],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    saveStorage(STORAGE_KEYS.SUPPORT_CONVERSATIONS, this.supportConversations);
+    this.notify();
+    return this.supportConversations[idx];
+  }
+
+  public addSupportMessage(conversationId: string, message: SupportMessage): SupportMessage {
+    const idx = this.supportConversations.findIndex(c => c.id === conversationId);
+    if (idx !== -1) {
+      this.supportConversations[idx].messages.push(message);
+      this.supportConversations[idx].updatedAt = new Date().toISOString();
+      saveStorage(STORAGE_KEYS.SUPPORT_CONVERSATIONS, this.supportConversations);
+      this.notify();
+    }
+    return message;
+  }
+
+  public addInternalStaffNote(conversationId: string, note: InternalStaffNote): InternalStaffNote {
+    const idx = this.supportConversations.findIndex(c => c.id === conversationId);
+    if (idx !== -1) {
+      if (!this.supportConversations[idx].internalNotes) {
+        this.supportConversations[idx].internalNotes = [];
+      }
+      this.supportConversations[idx].internalNotes!.push(note);
+      this.supportConversations[idx].updatedAt = new Date().toISOString();
+      saveStorage(STORAGE_KEYS.SUPPORT_CONVERSATIONS, this.supportConversations);
+      this.notify();
+    }
+    return note;
+  }
+
+  public getSupportStats(): SupportStatsSummary {
+    const list = this.supportConversations;
+    return {
+      total: list.length,
+      awaitingHuman: list.filter(c => c.status === 'awaiting_human').length,
+      activeHuman: list.filter(c => c.status === 'human_handling').length,
+      aiHandled: list.filter(c => c.handlingMode === 'ai' && c.status !== 'resolved').length,
+      resolved: list.filter(c => c.status === 'resolved').length,
+      unreadCount: list.filter(c => c.unreadByAdmin).length
+    };
+  }
+
   // --- RESET ---
   public resetToDefaults(): void {
     localStorage.removeItem(STORAGE_KEYS.APPLICATIONS);
@@ -742,6 +996,7 @@ export class DemoStore {
     localStorage.removeItem(STORAGE_KEYS.AUDIT_LOGS);
     localStorage.removeItem(STORAGE_KEYS.INQUIRIES);
     localStorage.removeItem(STORAGE_KEYS.VISITOR_LOCATIONS);
+    localStorage.removeItem(STORAGE_KEYS.SUPPORT_CONVERSATIONS);
 
     this.applications = [...INITIAL_APPLICATIONS];
     this.organizations = [...INITIAL_ORGANIZATIONS];
@@ -751,6 +1006,7 @@ export class DemoStore {
     this.auditLogs = [...INITIAL_AUDIT_LOGS];
     this.inquiries = [...INITIAL_INQUIRIES];
     this.visitorLocations = [...INITIAL_VISITOR_LOCATIONS];
+    this.supportConversations = [...INITIAL_SUPPORT_CONVERSATIONS];
 
     this.notify();
   }

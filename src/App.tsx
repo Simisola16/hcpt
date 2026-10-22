@@ -16,6 +16,9 @@ import { AboutPage } from './pages/AboutPage';
 import { ContactPage } from './pages/ContactPage';
 import { PublicVerificationPage } from './pages/PublicVerificationPage';
 import { AdminInquiriesPage } from './pages/AdminInquiriesPage';
+import { SupportInboxPage } from './pages/admin/SupportInboxPage';
+import { SupportMobilePage } from './pages/admin/SupportMobilePage';
+import { SupportChatWidget } from './components/support/SupportChatWidget';
 
 // Platform Demo
 import { PlatformDemoPage } from './pages/PlatformDemoPage';
@@ -35,11 +38,16 @@ import { apiClient } from './services/apiClient';
 
 // Layout wrapper for corporate pages
 function CorporateLayout({ children }: { children: React.ReactNode }) {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname.startsWith('/admin');
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
+      {/* Discreet AI Support Chat Widget across public website pages */}
+      {!isAdminRoute && <SupportChatWidget />}
     </div>
   );
 }
@@ -180,6 +188,12 @@ export function App() {
             </CorporateLayout>
           }
         />
+
+        {/* Dedicated Human Support Inbox (Desktop / Full Workspace) */}
+        <Route path="/admin/support" element={<SupportInboxPage />} />
+
+        {/* Dedicated Human Support Inbox (Mobile-First Smartphone App View) */}
+        <Route path="/admin/support/mobile" element={<SupportMobilePage />} />
 
         {/* Fallback route */}
         <Route
